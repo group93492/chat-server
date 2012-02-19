@@ -5,6 +5,7 @@
 
 enum ChatMessageType
 {
+    cmtUnknown,
     cmtInformationalMessage,
     cmtAuthorizationRequest,
     cmtAuthorizationAnswer
@@ -25,6 +26,7 @@ class ChatMessageBody: public Serializable
     Q_OBJECT
 public:
     explicit ChatMessageBody();
+    quint8 messageType;
 };
 
 class ChatMessageHeader: public Serializable
@@ -42,6 +44,7 @@ class AuthorizationAnswer : public ChatMessageBody
 public:
     explicit AuthorizationAnswer();
     bool authorizationResult;
+    QString authorizationReason;
 };
 
 class AuthorizationRequest: public ChatMessageBody

@@ -31,14 +31,12 @@ bool Serializable::unpack(QDataStream &stream)
 
 AuthorizationAnswer::AuthorizationAnswer()
 {
-}
-
-AuthorizationRequest::AuthorizationRequest()
-{
+    messageType = (quint8) cmtAuthorizationAnswer;
 }
 
 InformationalMessage::InformationalMessage()
 {
+    messageType = (quint8) cmtInformationalMessage;
 }
 
 ChatMessageHeader::ChatMessageHeader()
@@ -51,4 +49,9 @@ Serializable::Serializable()
 
 ChatMessageBody::ChatMessageBody()
 {
+}
+
+AuthorizationRequest::AuthorizationRequest()
+{
+    messageType = (quint8) cmtAuthorizationRequest;
 }
