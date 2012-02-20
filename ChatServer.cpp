@@ -1,5 +1,5 @@
 #include "ChatServer.h"
-
+using namespace std;
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
     defaultServerPort(32032)
@@ -42,7 +42,22 @@ void ChatServer::serverGotNewMessage()
         if(pClientSocket->bytesAvailable() < nextBlockSize)
             break;
         ChatMessageBody *newMessage = ChatMessageSerializer::unpackMessage(input);
-        processMessage(pClientSocket, newMessage);
+        //want something like this
+        //processMessage(pClientSocket, newMessage);
+        //but now could do only like this
+        switch ((ChatMessageType) newMessage->messageType)
+        {
+        case cmtInformationalMessage:
+            {
+                processMessage(pClientSocket, (InformationalMessage *) newMessage);
+                break;
+            }
+        case cmtAuthorizationRequest:
+            {
+                processMessage(pClientSocket, (InformationalMessage *) newMessage);
+                break;
+            }
+        }
         delete newMessage;
         nextBlockSize = 0;
     }

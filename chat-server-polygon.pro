@@ -14,8 +14,7 @@ SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
     ChatServer.cpp \
-    ChatMessageSerializer.cpp \
-    tempchatmessage.cpp
+    ChatMessageSerializer.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \

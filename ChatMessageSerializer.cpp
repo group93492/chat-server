@@ -1,13 +1,11 @@
 #include "ChatMessageSerializer.h"
 #include <QDebug>
 
-ChatMessageSerializer::ChatMessageSerializer()
+ChatMessageSerializer::ChatMessageSerializer(QObject *parent):
+    QObject(parent)
 {
 }
 
-ChatMessageType ChatMessageSerializer::unpackMessage(QDataStream &msgStream, ChatMessageBody *msgBody)
-{
-}
 
 ChatMessageBody *ChatMessageSerializer::unpackMessage(QDataStream &msgStream)
 {
@@ -36,12 +34,12 @@ ChatMessageBody *ChatMessageSerializer::unpackMessage(QDataStream &msgStream)
         }
     case cmtUnknown:
         {
-            return msgType;
+            return NULL;
         }
     default:
         {
             qDebug() << "Message processor found unknown message while unpacking";
-            return cmtUnknown;
+            return NULL;
         }
     }
     msgBody->unpack(msgStream);
