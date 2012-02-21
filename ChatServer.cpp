@@ -70,6 +70,9 @@ void ChatServer::processMessage(QTcpSocket *socket, InformationalMessage *msg)
     //got informational message
     //need to reply it to all authorized clients
     qDebug() << "Server processing informational message:" << msg->sender << msg->receiver << msg->messageBody;
+    QString messageText = "Received informational message. Sender: %1. Receiver: %2. Body: %3";
+    messageText.arg(msg->sender).arg(msg->receiver).arg(msg->messageBody);
+    emit logMessage(messageText);
     QMap<QString, QTcpSocket *>::iterator it = clientList.begin();
     for (; it != clientList.end(); ++it)
     {
@@ -81,6 +84,13 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
 {
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     bool authResult = msg->username.contains("yoba", Qt::CaseInsensitive);
+    QString messageText =   "Received authorization request from %1. He says that his name is %2 and password is %3."
+                            "I think i should%4authorize him because %5.";
+    messageText.arg(socket->peerAddress().toString())
+               .arg(msg->username)
+               .arg(msg->password)
+               .arg((authResult) ? " ": " not ")
+               .arg((authResult) ? "i like him" : "he's fool");
     AuthorizationAnswer *answer = new AuthorizationAnswer();
     answer->authorizationResult = authResult;
     if (authResult)

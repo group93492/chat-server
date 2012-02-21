@@ -2,6 +2,7 @@
 #define STATSWINDOW_H
 
 #include <QMainWindow>
+#include "ChatServer.h"
 
 namespace Ui {
 class StatsWindow;
@@ -17,6 +18,11 @@ public:
     
 private:
     Ui::StatsWindow *ui;
+    ChatServer *server;
+
+private slots:
+    void startServer();
+    void logServerMessage(QString &message);
 };
 
 #endif // STATSWINDOW_H
