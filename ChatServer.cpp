@@ -2,14 +2,16 @@
 using namespace std;
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
-    defaultServerPort(32032)
+    defaultServerPort(32032),
+    nextBlockSize(0)
 {
-    tcpServer = new QTcpServer(this);
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
+
 }
 
 bool ChatServer::startServer(quint16 nPort)
 {
+    tcpServer = new QTcpServer(this);
+    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
     quint16 port;
     if (nPort == 0)
         port = defaultServerPort;
@@ -54,7 +56,7 @@ void ChatServer::serverGotNewMessage()
             }
         case cmtAuthorizationRequest:
             {
-                processMessage(pClientSocket, (InformationalMessage *) newMessage);
+                processMessage(pClientSocket, (AuthorizationRequest *) newMessage);
                 break;
             }
         }
@@ -93,6 +95,7 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
         //tell him that he hasn't pass authorization
     }
     sendMessageToClient(socket, answer);
+    delete answer;
 }
 
 void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody)

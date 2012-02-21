@@ -13,7 +13,6 @@ ChatMessageBody *ChatMessageSerializer::unpackMessage(QDataStream &msgStream)
     header->unpack(msgStream);
     ChatMessageType msgType = (ChatMessageType) header->messageType;
     ChatMessageBody *msgBody;
-    msgBody->messageType = header->messageType;
     delete header;
     switch(msgType)
     {

@@ -13,7 +13,7 @@ private:
     QTcpServer *tcpServer;
     quint16 nextBlockSize;
     QMap<QString, QTcpSocket *> clientList;
-    quint16 defaultServerPort;
+    const quint16 defaultServerPort;
 
     void processMessage(QTcpSocket *socket, InformationalMessage *msg);
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);
@@ -24,9 +24,10 @@ public:
     bool startServer(quint16 nPort);
 signals:
     void logMessage(QString &msg);
-public slots:
+private slots:
     void serverGotNewConnection();
     void serverGotNewMessage();
+public slots:
 };
 
 #endif // CHATSERVER_H
