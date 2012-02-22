@@ -8,16 +8,11 @@ ChatServer::ChatServer(QObject *parent) :
 
 }
 
-bool ChatServer::startServer(quint16 nPort)
+bool ChatServer::startServer(quint16 nPort = defaultServerPort)
 {
     tcpServer = new QTcpServer(this);
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
-    quint16 port;
-    if (nPort == 0)
-        port = defaultServerPort;
-    else
-        port = nPort;
-    return tcpServer->listen(QHostAddress::Any, port);
+    return tcpServer->listen(QHostAddress::Any, nPort);
 }
 
 ChatMessageBody *unpackMessage(QDataStream &msgStream)
