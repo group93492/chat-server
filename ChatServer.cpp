@@ -8,59 +8,12 @@ ChatServer::ChatServer(QObject *parent) :
 
 }
 
-bool ChatServer::startServer(quint16 nPort = defaultServerPort)
+bool ChatServer::startServer(quint16 nPort = 0)
 {
     tcpServer = new QTcpServer(this);
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
-    return tcpServer->listen(QHostAddress::Any, nPort);
-}
-
-ChatMessageBody *unpackMessage(QDataStream &msgStream)
-{
-    ChatMessageHeader *header = new ChatMessageHeader();
-    header->unpack(msgStream);
-    ChatMessageType msgType = (ChatMessageType) header->messageType;
-    ChatMessageBody *msgBody;
-    delete header;
-    switch(msgType)
-    {
-    case cmtInformationalMessage:
-        {
-            msgBody = new InformationalMessage();
-            break;
-        }
-    case cmtAuthorizationRequest:
-        {
-            msgBody = new AuthorizationRequest();
-            break;
-        }
-    case cmtAuthorizationAnswer:
-        {
-            msgBody = new AuthorizationAnswer();
-            break;
-        }
-    case cmtUnknown:
-        {
-            return NULL;
-        }
-    default:
-        {
-            qDebug() << "Message processor found unknown message while unpacking";
-            return NULL;
-        }
-    }
-    msgBody->unpack(msgStream);
-    return msgBody;
-}
-
-void packMessage(QDataStream &msgStream, ChatMessageBody *msgBody)
-{
-    ChatMessageHeader *header = new ChatMessageHeader();
-    header->messageType = msgBody->messageType;
-    header->messageSize = sizeof(*msgBody);
-    header->pack(msgStream);
-    msgBody->pack(msgStream);
-    delete header;
+    quint16 port = (nPort == 0) ? defaultServerPort : nPort;
+    return tcpServer->listen(QHostAddress::Any, port);
 }
 
 void ChatServer::serverGotNewConnection()
@@ -86,7 +39,7 @@ void ChatServer::serverGotNewMessage()
         }
         if(pClientSocket->bytesAvailable() < nextBlockSize)
             break;
-        ChatMessageBody *newMessage = unpackMessage(input);
+        ChatMessageBody *newMessage = ChatMessageSerializer::unpackMessage(input);
         //want something like this
         //processMessage(pClientSocket, newMessage);
         //but now could do only like this
@@ -116,7 +69,9 @@ void ChatServer::processMessage(QTcpSocket *socket, InformationalMessage *msg)
     //need to reply it to all authorized clients
     qDebug() << "Server processing informational message:" << msg->sender << msg->receiver << msg->messageBody;
     QString messageText = "Received informational message. Sender: %1. Receiver: %2. Body: %3";
-    messageText.arg(msg->sender).arg(msg->receiver).arg(msg->messageBody);
+    messageText.arg(msg->sender)
+               .arg(msg->receiver)
+               .arg(msg->messageBody);
     emit logMessage(messageText);
     QMap<QString, QTcpSocket *>::iterator it = clientList.begin();
     for (; it != clientList.end(); ++it)
@@ -159,7 +114,7 @@ void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBod
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
     output.setVersion(QDataStream::Qt_4_7);
     output << quint16(0);
-    packMessage(output, msgBody);
+    ChatMessageSerializer::packMessage(output, msgBody);
     output << quint16(arrBlock.size() - sizeof(quint16));
     socket->write(arrBlock);
 }
