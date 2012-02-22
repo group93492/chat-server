@@ -55,49 +55,4 @@ void ChatMessageSerializer::packMessage(QDataStream &msgStream, ChatMessageBody 
     delete header;
 }
 
-/*
-void ChatMessageProcessor::unpackMessage(QDataStream &messageStream)
-{
-    ChatMessageHeader *header = new ChatMessageHeader();
-    header->unpack(messageStream);
-    ChatMessageBody *msg;
-    switch((ChatMessageType) header->messageType)
-    {
-    case cmtInformationalMessage:
-        {
-            msg = new InformationalMessage();
-            break;
-        }
-    case cmtAuthorizationRequest:
-        {
-            msg = new AuthorizationRequest();
-            break;
-        }
-    case cmtAuthorizationAnswer:
-        {
-            msg = new AuthorizationAnswer();
-            break;
-        }
-    default:
-        {
-            qDebug() << "Message processor found unknown message while unpacking";
-            return;
-        }
-    }
-    delete header;
-    msg->unpack(messageStream);
-    emit messageUnpacked(msg);
-}
-
-void ChatMessageProcessor::packMessage(ChatMessageBody *msgBody, ChatMessageType msgType)
-{
-    ChatMessageHeader *header = new ChatMessageHeader();
-    header->messageType = msgType;
-    header->messageSize = sizeof(*msgBody);
-    QDataStream msgStream;
-    header->pack(msgStream);
-    msgBody->pack(msgStream);
-    emit messagePacked(msgStream);
-}*/
-
 

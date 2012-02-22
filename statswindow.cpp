@@ -19,11 +19,17 @@ StatsWindow::~StatsWindow()
 void StatsWindow::startServer()
 {
     quint16 port = ui->portEdit->text().toUInt();
+    QString msg;
     if (server->startServer(port))
+    {
         ui->startButton->setEnabled(false);
+        msg = "Server started on localhost:%1";
+        msg.arg(port);
+        ui->logBrowser->append(msg);
+    }
     else
     {
-        QString msg = "Unable to start server.";
+        msg = "Unable to start server.";
         logServerMessage(msg);
     }
 }

@@ -2,11 +2,14 @@
 #include <QDataStream>
 #include <QMetaObject>
 #include <QMetaProperty>
+#include <QDebug>
+#include <typeinfo>
 
 bool Serializable::pack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
         return false;
+    qDebug() << "packing message typed " << typeid(this).name();
     for(int propIndex = this->metaObject()->propertyOffset(); propIndex < this->metaObject()->propertyCount(); ++propIndex)
     {
         QMetaProperty prop = this->metaObject()->property(propIndex);
@@ -19,6 +22,7 @@ bool Serializable::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
         return false;
+    qDebug() << "unpacking message typed " << typeid(this).name();
     for(int propIndex = this->metaObject()->propertyOffset(); propIndex < this->metaObject()->propertyCount(); ++propIndex)
     {
         QMetaProperty prop = this->metaObject()->property(propIndex);

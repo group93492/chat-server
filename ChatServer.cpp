@@ -2,7 +2,7 @@
 using namespace std;
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
-    defaultServerPort(32032),
+    defaultServerPort(33033),
     nextBlockSize(0)
 {
 
@@ -18,6 +18,54 @@ bool ChatServer::startServer(quint16 nPort)
     else
         port = nPort;
     return tcpServer->listen(QHostAddress::Any, port);
+}
+
+ChatMessageBody *unpackMessage(QDataStream &msgStream)
+{
+    ChatMessageHeader *header = new ChatMessageHeader();
+    header->unpack(msgStream);
+    ChatMessageType msgType = (ChatMessageType) header->messageType;
+    ChatMessageBody *msgBody;
+    delete header;
+    switch(msgType)
+    {
+    case cmtInformationalMessage:
+        {
+            msgBody = new InformationalMessage();
+            break;
+        }
+    case cmtAuthorizationRequest:
+        {
+            msgBody = new AuthorizationRequest();
+            break;
+        }
+    case cmtAuthorizationAnswer:
+        {
+            msgBody = new AuthorizationAnswer();
+            break;
+        }
+    case cmtUnknown:
+        {
+            return NULL;
+        }
+    default:
+        {
+            qDebug() << "Message processor found unknown message while unpacking";
+            return NULL;
+        }
+    }
+    msgBody->unpack(msgStream);
+    return msgBody;
+}
+
+void packMessage(QDataStream &msgStream, ChatMessageBody *msgBody)
+{
+    ChatMessageHeader *header = new ChatMessageHeader();
+    header->messageType = msgBody->messageType;
+    header->messageSize = sizeof(*msgBody);
+    header->pack(msgStream);
+    msgBody->pack(msgStream);
+    delete header;
 }
 
 void ChatServer::serverGotNewConnection()
@@ -43,7 +91,7 @@ void ChatServer::serverGotNewMessage()
         }
         if(pClientSocket->bytesAvailable() < nextBlockSize)
             break;
-        ChatMessageBody *newMessage = ChatMessageSerializer::unpackMessage(input);
+        ChatMessageBody *newMessage = unpackMessage(input);
         //want something like this
         //processMessage(pClientSocket, newMessage);
         //but now could do only like this
@@ -59,6 +107,8 @@ void ChatServer::serverGotNewMessage()
                 processMessage(pClientSocket, (AuthorizationRequest *) newMessage);
                 break;
             }
+        default:
+            qDebug() << "Server received unknown type of message";
         }
         delete newMessage;
         nextBlockSize = 0;
@@ -113,6 +163,8 @@ void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBod
     QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
     output.setVersion(QDataStream::Qt_4_7);
-    ChatMessageSerializer::packMessage(output, msgBody);
+    output << quint16(0);
+    packMessage(output, msgBody);
+    output << quint16(arrBlock.size() - sizeof(quint16));
     socket->write(arrBlock);
 }
