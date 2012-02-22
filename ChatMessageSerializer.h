@@ -2,7 +2,7 @@
 #define CHATMESSAGEPROCESSOR_H
 
 #include <QObject>
-#include <../chat-server-polygon/ChatMessages.h>
+#include <ChatMessages.h>
 #include <QDataStream>
 
 class ChatMessageSerializer: public QObject
