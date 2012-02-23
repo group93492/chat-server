@@ -6,7 +6,7 @@
 enum ChatMessageType
 {
     cmtUnknown,
-    cmtInformationalMessage,
+    cmtChannelMessage,
     cmtAuthorizationRequest,
     cmtAuthorizationAnswer
     /*etc*/
@@ -24,46 +24,84 @@ public:
 class ChatMessageBody: public Serializable
 {
     Q_OBJECT
+    Q_PROPERTY(quint8 messageType READ getMessageType)
+protected:
+    quint8 m_messageType;
 public:
     explicit ChatMessageBody();
-    quint8 messageType;
+    quint8 getMessageType();
 };
 
 class ChatMessageHeader: public Serializable
 {
     Q_OBJECT
+    Q_PROPERTY(quint8 messageType READ getMessageType WRITE setMessageType)
+    Q_PROPERTY(quint32 messageSize READ getMessageSize WRITE setMessageSize)
+protected:
+    quint8 m_messageType;
+    quint32 m_messageSize;
 public:
     explicit ChatMessageHeader();
-    quint8 messageType;
-    quint32 messageSize;
+    quint8 getMessageType();
+    void setMessageType(const quint8 type);
+    quint32 getMessageSize();
+    void setMessageSize(const quint32 size);
 };
 
 class AuthorizationAnswer : public ChatMessageBody
 {
     Q_OBJECT
+    Q_PROPERTY(quint8 messageType READ getMessageType)
+    Q_PROPERTY(bool authorizationResult READ getAuthorizationResult WRITE setAuthorizationResult)
+    Q_PROPERTY(QString denialReason READ getDenialReason WRITE setDenialReason)
+protected:
+    bool m_authorizationResult;
+    QString m_denialReason;
 public:
     explicit AuthorizationAnswer();
-    bool authorizationResult;
-    QString authorizationReason;
+    bool getAuthorizationResult();
+    void setAuthorizationResult(const bool result);
+    QString &getDenialReason();
+    void setDenialReason(const QString &reason);
 };
 
 class AuthorizationRequest: public ChatMessageBody
 {
     Q_OBJECT
+    Q_PROPERTY(quint8 messageType READ getMessageType)
+    Q_PROPERTY(QString username READ getUsername WRITE setUsername)
+    Q_PROPERTY(QString password READ getPassword WRITE setPassword)
+protected:
+    QString m_username;
+    QString m_password;
 public:
     explicit AuthorizationRequest();
-    QString username;
-    QString password;
+    QString &getUsername();
+    void setUsername(const QString &un);
+    QString &getPassword();
+    void setPassword(const QString &pw);
 };
 
-class InformationalMessage : public ChatMessageBody
+class ChannelMessage : public ChatMessageBody
 {
     Q_OBJECT
+    Q_PROPERTY(quint8 messageType READ getMessageType)
+    Q_PROPERTY(QString sender READ getSender WRITE setSender)
+    Q_PROPERTY(QString receiver READ getReceiver WRITE setReceiver)
+    Q_PROPERTY(QString messageText READ getMessageText WRITE setMessageText)
+protected:
+    QString m_sender;
+    QString m_receiver;
+    QString m_messageText;
 public:
-    explicit InformationalMessage();
-    QString sender;
-    QString receiver;
-    QString messageBody;
+    explicit ChannelMessage();
+    QString &getSender();
+    void setSender(const QString &sender);
+    QString &getReceiver();
+    void setReceiver(const QString &receiver);
+    QString &getMessageText();
+    void setMessageText(const QString &text);
+
 };
 
 #endif // CHATMESSAGES_H

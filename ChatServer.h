@@ -13,9 +13,8 @@ private:
     QTcpServer *tcpServer;
     quint16 nextBlockSize;
     QMap<QString, QTcpSocket *> clientList;
-    const quint16 defaultServerPort;
 
-    void processMessage(QTcpSocket *socket, InformationalMessage *msg);
+    void processMessage(QTcpSocket *socket, ChannelMessage *msg);
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);
 
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody* msgBody);

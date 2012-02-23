@@ -1,26 +1,24 @@
 #include "ChatServer.h"
-using namespace std;
+
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
-    defaultServerPort(33033),
     nextBlockSize(0)
 {
 
 }
 
-bool ChatServer::startServer(quint16 nPort = 0)
+bool ChatServer::startServer(quint16 nPort = 33033)
 {
     tcpServer = new QTcpServer(this);
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
-    quint16 port = (nPort == 0) ? defaultServerPort : nPort;
-    return tcpServer->listen(QHostAddress::Any, port);
+    return tcpServer->listen(QHostAddress::Any, nPort);
 }
 
 void ChatServer::serverGotNewConnection()
 {
     QTcpSocket *newSocket = tcpServer->nextPendingConnection();
     connect(newSocket, SIGNAL(readyRead()), this, SLOT(serverGotNewMessage()));
-    qDebug() << "Server got new connection from" << newSocket->peerAddress() << newSocket->peerPort();
+    qDebug() << "Server got new connection from" << newSocket->peerAddress().toString() << newSocket->peerPort();
 }
 
 void ChatServer::serverGotNewMessage()
@@ -29,25 +27,26 @@ void ChatServer::serverGotNewMessage()
     QTcpSocket *pClientSocket = (QTcpSocket*)sender();
     QDataStream input(pClientSocket);
     input.setVersion(QDataStream::Qt_4_7);
+    ChatMessageBody *newMessage;
     while (true)
     {
-        if(!nextBlockSize)
+        if (!nextBlockSize)
         {
-            if(pClientSocket->bytesAvailable() < sizeof(quint16))
+            if (pClientSocket->bytesAvailable() < sizeof(quint16))
                 break;
             input >> nextBlockSize;
         }
-        if(pClientSocket->bytesAvailable() < nextBlockSize)
+        if (pClientSocket->bytesAvailable() < nextBlockSize)
             break;
-        ChatMessageBody *newMessage = ChatMessageSerializer::unpackMessage(input);
+        newMessage = ChatMessageSerializer::unpackMessage(input);
         //want something like this
         //processMessage(pClientSocket, newMessage);
         //but now could do only like this
-        switch ((ChatMessageType) newMessage->messageType)
+        switch ((ChatMessageType) newMessage->getMessageType())
         {
-        case cmtInformationalMessage:
+        case cmtChannelMessage:
             {
-                processMessage(pClientSocket, (InformationalMessage *) newMessage);
+                processMessage(pClientSocket, (ChannelMessage *) newMessage);
                 break;
             }
         case cmtAuthorizationRequest:
@@ -56,22 +55,25 @@ void ChatServer::serverGotNewMessage()
                 break;
             }
         default:
-            qDebug() << "Server received unknown type of message";
+            {
+                qDebug() << "Server received unknown type of message";
+                break;
+            }
         }
-        delete newMessage;
         nextBlockSize = 0;
     }
+    delete newMessage;
 }
 
-void ChatServer::processMessage(QTcpSocket *socket, InformationalMessage *msg)
+void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
 {
     //got informational message
     //need to reply it to all authorized clients
-    qDebug() << "Server processing informational message:" << msg->sender << msg->receiver << msg->messageBody;
-    QString messageText = "Received informational message. Sender: %1. Receiver: %2. Body: %3";
-    messageText.arg(msg->sender)
-               .arg(msg->receiver)
-               .arg(msg->messageBody);
+    qDebug() << "Server processing channel message:" << msg->getSender() << msg->getReceiver() << msg->getMessageText();
+    QString messageText = "Received channel message. Sender: %1. Receiver: %2. Body: %3";
+    messageText.arg(msg->getSender())
+            .arg(msg->getReceiver())
+            .arg(msg->getMessageText());
     emit logMessage(messageText);
     QMap<QString, QTcpSocket *>::iterator it = clientList.begin();
     for (; it != clientList.end(); ++it)
@@ -82,26 +84,27 @@ void ChatServer::processMessage(QTcpSocket *socket, InformationalMessage *msg)
 
 void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
 {
-    qDebug() << "Server processing authorization request: " << msg->username << msg->password;
-    bool authResult = msg->username.contains("yoba", Qt::CaseInsensitive);
+    qDebug() << "Server processing authorization request: " << msg->getUsername() << msg->getPassword();
+    bool authResult = msg->getUsername().contains("yoba", Qt::CaseInsensitive);
     QString messageText =   "Received authorization request from %1. He says that his name is %2 and password is %3."
                             "I think i should%4authorize him because %5.";
     messageText.arg(socket->peerAddress().toString())
-               .arg(msg->username)
-               .arg(msg->password)
-               .arg((authResult) ? " ": " not ")
-               .arg((authResult) ? "i like him" : "he's fool");
+            .arg(msg->getUsername())
+            .arg(msg->getPassword())
+            .arg((authResult) ? " ": " not ")
+            .arg((authResult) ? "i like him" : "he's fool");
     AuthorizationAnswer *answer = new AuthorizationAnswer();
-    answer->authorizationResult = authResult;
+    answer->setAuthorizationResult(authResult);
     if (authResult)
     {
         //add him to client list
-        clientList.insert(msg->username, socket);
+        clientList.insert(msg->getUsername(), socket);
+        emit logMessage(messageText);
         //tell him, that he passed authorization
     }
     else
     {
-        answer->authorizationReason = "Invalid username or password";
+        answer->setDenialReason("Invalid username or password");
         //tell him that he hasn't pass authorization
     }
     sendMessageToClient(socket, answer);

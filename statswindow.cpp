@@ -24,7 +24,7 @@ void StatsWindow::startServer()
     {
         ui->startButton->setEnabled(false);
         msg = "Server started on localhost:%1";
-        msg.arg(port);
+        msg.arg(QString::number(port));
         ui->logBrowser->append(msg);
     }
     else

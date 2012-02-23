@@ -11,14 +11,14 @@ ChatMessageBody *ChatMessageSerializer::unpackMessage(QDataStream &msgStream)
 {
     ChatMessageHeader *header = new ChatMessageHeader();
     header->unpack(msgStream);
-    ChatMessageType msgType = (ChatMessageType) header->messageType;
+    ChatMessageType msgType = (ChatMessageType) header->getMessageType();
     ChatMessageBody *msgBody;
     delete header;
     switch(msgType)
     {
-    case cmtInformationalMessage:
+    case cmtChannelMessage:
         {
-            msgBody = new InformationalMessage();
+            msgBody = new ChannelMessage();
             break;
         }
     case cmtAuthorizationRequest:
@@ -48,8 +48,8 @@ ChatMessageBody *ChatMessageSerializer::unpackMessage(QDataStream &msgStream)
 void ChatMessageSerializer::packMessage(QDataStream &msgStream, ChatMessageBody *msgBody)
 {
     ChatMessageHeader *header = new ChatMessageHeader();
-    header->messageType = msgBody->messageType;
-    header->messageSize = sizeof(*msgBody);
+    header->setMessageType(msgBody->getMessageType());
+    header->setMessageSize(sizeof(*msgBody));
     header->pack(msgStream);
     msgBody->pack(msgStream);
     delete header;
