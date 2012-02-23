@@ -23,8 +23,8 @@ void StatsWindow::startServer()
     if (server->startServer(port))
     {
         ui->startButton->setEnabled(false);
-        msg = "Server started on localhost:%1";
-        msg.arg(QString::number(port));
+        msg = QString("Server started on localhost:%1")
+                               .arg(QString::number(port));
         ui->logBrowser->append(msg);
     }
     else
