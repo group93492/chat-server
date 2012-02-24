@@ -12,31 +12,21 @@ enum ChatMessageType
     /*etc*/
 };
 
-class Serializable: public QObject
+class ChatMessageBody: public QObject
 {
     Q_OBJECT
-public:
-    explicit Serializable();
-    bool pack(QDataStream &stream);
-    bool unpack(QDataStream &stream);
-};
-
-class ChatMessageBody: public Serializable
-{
-    Q_OBJECT
-    Q_PROPERTY(quint8 messageType READ getMessageType)
 protected:
     quint8 m_messageType;
 public:
     explicit ChatMessageBody();
     quint8 getMessageType();
+    virtual bool pack(QDataStream &stream);
+    virtual bool unpack(QDataStream &stream);
 };
 
-class ChatMessageHeader: public Serializable
+class ChatMessageHeader: public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(quint8 messageType READ getMessageType WRITE setMessageType)
-    Q_PROPERTY(quint32 messageSize READ getMessageSize WRITE setMessageSize)
 protected:
     quint8 m_messageType;
     quint32 m_messageSize;
@@ -46,14 +36,13 @@ public:
     void setMessageType(const quint8 type);
     quint32 getMessageSize();
     void setMessageSize(const quint32 size);
+    bool pack(QDataStream &stream);
+    bool unpack(QDataStream &stream);
 };
 
 class AuthorizationAnswer : public ChatMessageBody
 {
     Q_OBJECT
-    Q_PROPERTY(quint8 messageType READ getMessageType)
-    Q_PROPERTY(bool authorizationResult READ getAuthorizationResult WRITE setAuthorizationResult)
-    Q_PROPERTY(QString denialReason READ getDenialReason WRITE setDenialReason)
 protected:
     bool m_authorizationResult;
     QString m_denialReason;
@@ -63,14 +52,13 @@ public:
     void setAuthorizationResult(const bool result);
     QString &getDenialReason();
     void setDenialReason(const QString &reason);
+    virtual bool pack(QDataStream &stream);
+    virtual bool unpack(QDataStream &stream);
 };
 
 class AuthorizationRequest: public ChatMessageBody
 {
     Q_OBJECT
-    Q_PROPERTY(quint8 messageType READ getMessageType)
-    Q_PROPERTY(QString username READ getUsername WRITE setUsername)
-    Q_PROPERTY(QString password READ getPassword WRITE setPassword)
 protected:
     QString m_username;
     QString m_password;
@@ -80,15 +68,13 @@ public:
     void setUsername(const QString &un);
     QString &getPassword();
     void setPassword(const QString &pw);
+    virtual bool pack(QDataStream &stream);
+    virtual bool unpack(QDataStream &stream);
 };
 
 class ChannelMessage : public ChatMessageBody
 {
     Q_OBJECT
-    Q_PROPERTY(quint8 messageType READ getMessageType)
-    Q_PROPERTY(QString sender READ getSender WRITE setSender)
-    Q_PROPERTY(QString receiver READ getReceiver WRITE setReceiver)
-    Q_PROPERTY(QString messageText READ getMessageText WRITE setMessageText)
 protected:
     QString m_sender;
     QString m_receiver;
@@ -101,7 +87,8 @@ public:
     void setReceiver(const QString &receiver);
     QString &getMessageText();
     void setMessageText(const QString &text);
-
+    virtual bool pack(QDataStream &stream);
+    virtual bool unpack(QDataStream &stream);
 };
 
 #endif // CHATMESSAGES_H

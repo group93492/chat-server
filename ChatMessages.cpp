@@ -3,36 +3,6 @@
 #include <QMetaObject>
 #include <QMetaProperty>
 
-bool Serializable::pack(QDataStream &stream)
-{
-    if (stream.status() != QDataStream::Ok)
-        return false;
-    for(int propIndex = this->metaObject()->propertyOffset(); propIndex < this->metaObject()->propertyCount(); ++propIndex)
-    {
-        QMetaProperty prop = this->metaObject()->property(propIndex);
-        stream << this->property(prop.name());
-    }
-    return true;
-}
-
-bool Serializable::unpack(QDataStream &stream)
-{
-    if (stream.status() != QDataStream::Ok)
-        return false;
-    for(int propIndex = this->metaObject()->propertyOffset(); propIndex < this->metaObject()->propertyCount(); ++propIndex)
-    {
-        QMetaProperty prop = this->metaObject()->property(propIndex);
-        QVariant value;
-        stream >> value;
-        this->setProperty(prop.name(), value);
-    }
-    return true;
-}
-
-Serializable::Serializable()
-{
-}
-
 quint8 ChatMessageHeader::getMessageType()
 {
     return m_messageType;
@@ -57,9 +27,33 @@ ChatMessageHeader::ChatMessageHeader()
 {
 }
 
+bool ChatMessageHeader::pack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << m_messageType;
+    return true;
+}
+
+bool ChatMessageHeader::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> m_messageType;
+    return true;
+}
+
 quint8 ChatMessageBody::getMessageType()
 {
     return m_messageType;
+}
+
+bool ChatMessageBody::pack(QDataStream &stream)
+{
+}
+
+bool ChatMessageBody::unpack(QDataStream &stream)
+{
 }
 
 ChatMessageBody::ChatMessageBody()
@@ -91,6 +85,27 @@ AuthorizationAnswer::AuthorizationAnswer()
     m_messageType = cmtAuthorizationAnswer;
 }
 
+bool AuthorizationAnswer::pack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    if(getAuthorizationResult())
+        stream << m_authorizationResult;
+    else
+        stream << m_authorizationResult << m_denialReason;
+    return true;
+}
+
+bool AuthorizationAnswer::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> m_authorizationResult;
+    if(!m_authorizationResult)
+        stream >> m_denialReason;
+    return true;
+}
+
 AuthorizationRequest::AuthorizationRequest()
 {
     m_messageType = cmtAuthorizationRequest;
@@ -114,6 +129,22 @@ QString &AuthorizationRequest::getPassword()
 void AuthorizationRequest::setPassword(const QString &pw)
 {
     m_password = pw;
+}
+
+bool AuthorizationRequest::pack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << m_username << m_password;
+    return true;
+}
+
+bool AuthorizationRequest::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> m_username >> m_password;
+    return true;
 }
 
 ChannelMessage::ChannelMessage()
@@ -151,4 +182,18 @@ void ChannelMessage::setMessageText(const QString &text)
     m_messageText = text;
 }
 
+bool ChannelMessage::pack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << m_sender << m_receiver << m_messageText;
+    return true;
+}
 
+bool ChannelMessage::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> m_sender >> m_receiver >> m_messageText;
+    return true;
+}
