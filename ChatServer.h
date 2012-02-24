@@ -2,9 +2,9 @@
 #define CHATSERVER_H
 
 #include <QObject>
-#include <ChatMessageSerializer.h>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
+#include "ChatMessages.h"
 
 class ChatServer : public QObject
 {

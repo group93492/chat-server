@@ -13,13 +13,11 @@ TEMPLATE = app
 SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
-    ChatServer.cpp \
-    ChatMessageSerializer.cpp
+    ChatServer.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
     ChatServer.h \
-    ChatMessageSerializer.h \
     tempchatmessage.h
 
 FORMS    += statswindow.ui
