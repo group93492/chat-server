@@ -6,18 +6,17 @@
 
 QT       += core gui network
 
-TARGET = chat-server-polygon
+TARGET = chat-server
 TEMPLATE = app
 
 
 SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
-    ChatServer.cpp
+            ChatServer.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
-    ChatServer.h \
-    tempchatmessage.h
+            ChatServer.h
 
 FORMS    += statswindow.ui
