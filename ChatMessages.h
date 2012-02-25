@@ -38,8 +38,8 @@ public:
     AuthorizationAnswer();
     bool authorizationResult;
     QString denialReason;
-    virtual bool pack(QDataStream &stream);
-    virtual bool unpack(QDataStream &stream);
+    bool pack(QDataStream &stream);
+    bool unpack(QDataStream &stream);
 };
 
 class AuthorizationRequest: public ChatMessageBody
@@ -48,8 +48,8 @@ public:
     AuthorizationRequest();
     QString username;
     QString password;
-    virtual bool pack(QDataStream &stream);
-    virtual bool unpack(QDataStream &stream);
+    bool pack(QDataStream &stream);
+    bool unpack(QDataStream &stream);
 };
 
 class ChannelMessage : public ChatMessageBody
@@ -59,8 +59,8 @@ public:
     QString sender;
     QString receiver;
     QString messageText;
-    virtual bool pack(QDataStream &stream);
-    virtual bool unpack(QDataStream &stream);
+    bool pack(QDataStream &stream);
+    bool unpack(QDataStream &stream);
 };
 
 #endif // CHATMESSAGES_H
