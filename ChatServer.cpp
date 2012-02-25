@@ -40,7 +40,7 @@ void ChatServer::serverGotNewMessage()
         //message in in <input>, unpack it
         ChatMessageHeader *header = new ChatMessageHeader();
         header->unpack(input);
-        ChatMessageType msgType = (ChatMessageType) header->getMessageType();
+        ChatMessageType msgType = (ChatMessageType) header->messageType;
         delete header;
         switch (msgType)
         {
@@ -74,11 +74,11 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
 {
     //got informational message
     //need to reply it to all authorized clients
-    qDebug() << "Server processing channel message:" << msg->getSender() << msg->getReceiver() << msg->getMessageText();
+    qDebug() << "Server processing channel message:" << msg->sender << msg->receiver << msg->messageText;
     QString messageText = QString("Received channel message. Sender: %1. Receiver: %2. Body: %3")
-            .arg(msg->getSender())
-            .arg(msg->getReceiver())
-            .arg(msg->getMessageText());
+            .arg(msg->sender)
+            .arg(msg->receiver)
+            .arg(msg->messageText);
     emit logMessage(messageText);
     QMap<QString, QTcpSocket *>::iterator it = clientList.begin();
     for (; it != clientList.end(); ++it)
@@ -89,27 +89,27 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
 
 void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
 {
-    qDebug() << "Server processing authorization request: " << msg->getUsername() << msg->getPassword();
-    bool authResult = msg->getUsername().contains("yoba", Qt::CaseInsensitive);
+    qDebug() << "Server processing authorization request: " << msg->username << msg->password;
+    bool authResult = msg->username.contains("yoba", Qt::CaseInsensitive);
     QString messageText = QString("Received authorization request from %1. He says that his name is %2 and password is %3."
                         " I think i should%4authorize him because %5.")
                 .arg(socket->peerAddress().toString())
-                .arg(msg->getUsername())
-                .arg(msg->getPassword())
+                .arg(msg->username)
+                .arg(msg->password)
                 .arg((authResult) ? " ": " not ")
                 .arg((authResult) ? "i like his name" : "he's fool");
     AuthorizationAnswer *answer = new AuthorizationAnswer();
-    answer->setAuthorizationResult(authResult);
+    answer->authorizationResult = authResult;
     if (authResult)
     {
         //add him to client list
-        clientList.insert(msg->getUsername(), socket);
+        clientList.insert(msg->username, socket);
         emit logMessage(messageText);
         //tell him, that he passed authorization
     }
     else
     {
-        answer->setDenialReason("Invalid username or password");
+        answer->denialReason = "Invalid username or password";
         //tell him that he hasn't pass authorization
     }
     sendMessageToClient(socket, answer);
@@ -124,9 +124,7 @@ void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBod
     output << quint16(0);
 
 //    ChatMessageSerializer::packMessage(output, msgBody);
-    ChatMessageHeader *header = new ChatMessageHeader();
-    header->setMessageType(msgBody->getMessageType());
-    header->setMessageSize(sizeof(*msgBody));
+    ChatMessageHeader *header = new ChatMessageHeader(msgBody);
     header->pack(output);
     msgBody->pack(output);
     delete header;
