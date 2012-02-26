@@ -15,16 +15,16 @@ enum ChatMessageType
 class ChatMessageBody
 {
 public:
-    ChatMessageBody();
+    ChatMessageBody() {}
     quint8 messageType;
-    virtual bool pack(QDataStream &stream);
-    virtual bool unpack(QDataStream &stream);
+    virtual bool pack(QDataStream &stream) = 0;
+    virtual bool unpack(QDataStream &stream) = 0;
 };
 
 class ChatMessageHeader
 {
 public:
-    ChatMessageHeader();
+    ChatMessageHeader() {}
     ChatMessageHeader(ChatMessageBody *msgBody);
     quint8 messageType;
     quint32 messageSize;

@@ -1,21 +1,5 @@
 #include "ChatMessages.h"
 
-ChatMessageBody::ChatMessageBody()
-{
-}
-
-bool ChatMessageBody::pack(QDataStream &stream)
-{
-}
-
-bool ChatMessageBody::unpack(QDataStream &stream)
-{
-}
-
-ChatMessageHeader::ChatMessageHeader()
-{
-}
-
 ChatMessageHeader::ChatMessageHeader(ChatMessageBody *msgBody)
 {
     messageType = msgBody->messageType;
