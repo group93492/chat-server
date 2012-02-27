@@ -18,16 +18,18 @@ private:
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);
 
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody* msgBody);
+
 public:
     enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
     bool startServer(const quint16 nPort);
+
 signals:
     void logMessage(QString &msg);
+
 private slots:
     void serverGotNewConnection();
     void serverGotNewMessage();
-public slots:
 };
 
 #endif // CHATSERVER_H

@@ -4,7 +4,6 @@ ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
     m_nextBlockSize(0)
 {
-
 }
 
 bool ChatServer::startServer(const quint16 nPort = defaultPort)
@@ -79,9 +78,7 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
     emit logMessage(messageText);
     QMap<QString, QTcpSocket *>::iterator it = m_clientList.begin();
     for (; it != m_clientList.end(); ++it)
-    {
         sendMessageToClient(it.value(), msg);
-    }
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
