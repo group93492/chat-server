@@ -1,12 +1,12 @@
 #include "ChatMessages.h"
 
-ChatMessageHeader::ChatMessageHeader(ChatMessageBody *msgBody)
+ChatMessageHeader::ChatMessageHeader(const ChatMessageBody *msgBody)
 {
     messageType = msgBody->messageType;
     messageSize = sizeof(*msgBody);
 }
 
-bool ChatMessageHeader::pack(QDataStream &stream)
+bool ChatMessageHeader::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;
@@ -27,7 +27,7 @@ AuthorizationAnswer::AuthorizationAnswer()
     messageType = cmtAuthorizationAnswer;
 }
 
-bool AuthorizationAnswer::pack(QDataStream &stream)
+bool AuthorizationAnswer::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;
@@ -53,7 +53,7 @@ AuthorizationRequest::AuthorizationRequest()
     messageType = cmtAuthorizationRequest;
 }
 
-bool AuthorizationRequest::pack(QDataStream &stream)
+bool AuthorizationRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;
@@ -74,7 +74,7 @@ ChannelMessage::ChannelMessage()
     messageType = cmtChannelMessage;
 }
 
-bool ChannelMessage::pack(QDataStream &stream)
+bool ChannelMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;

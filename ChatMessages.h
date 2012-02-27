@@ -17,7 +17,7 @@ class ChatMessageBody
 public:
     ChatMessageBody() {}
     quint8 messageType;
-    virtual bool pack(QDataStream &stream) = 0;
+    virtual bool pack(QDataStream &stream) const = 0;
     virtual bool unpack(QDataStream &stream) = 0;
 };
 
@@ -25,10 +25,10 @@ class ChatMessageHeader
 {
 public:
     ChatMessageHeader() {}
-    ChatMessageHeader(ChatMessageBody *msgBody);
+    ChatMessageHeader(const ChatMessageBody *msgBody);
     quint8 messageType;
     quint32 messageSize;
-    bool pack(QDataStream &stream);
+    bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
 
@@ -38,7 +38,7 @@ public:
     AuthorizationAnswer();
     bool authorizationResult;
     QString denialReason;
-    bool pack(QDataStream &stream);
+    bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
 
@@ -48,7 +48,7 @@ public:
     AuthorizationRequest();
     QString username;
     QString password;
-    bool pack(QDataStream &stream);
+    bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
 
@@ -59,7 +59,7 @@ public:
     QString sender;
     QString receiver;
     QString messageText;
-    bool pack(QDataStream &stream);
+    bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
 

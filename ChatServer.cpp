@@ -7,7 +7,7 @@ ChatServer::ChatServer(QObject *parent) :
 
 }
 
-bool ChatServer::startServer(quint16 nPort = 33033)
+bool ChatServer::startServer(const quint16 nPort = defaultPort)
 {
     m_tcpServer = new QTcpServer(this);
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));

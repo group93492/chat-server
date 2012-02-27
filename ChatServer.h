@@ -19,8 +19,9 @@ private:
 
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody* msgBody);
 public:
+    enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
-    bool startServer(quint16 nPort);
+    bool startServer(const quint16 nPort);
 signals:
     void logMessage(QString &msg);
 private slots:
