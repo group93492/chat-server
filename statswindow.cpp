@@ -26,6 +26,9 @@ void StatsWindow::startServer()
         msg = QString("Server started on localhost:%1")
                                .arg(QString::number(port));
         ui->logBrowser->append(msg);
+        connect(server->DataBase, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+        connect(this, SIGNAL(lookTableSgnl(QTableView*, QString)), server->DataBase, SLOT(lookTable(QTableView*, QString)));
+        server->DataBase->connectToBase();
     }
     else
     {
@@ -37,4 +40,9 @@ void StatsWindow::startServer()
 void StatsWindow::logServerMessage(QString &message)
 {
     ui->logBrowser->append(message);
+}
+
+void StatsWindow::on_watchTableButton_clicked()
+{
+    emit lookTableSgnl(ui->tableView, ui->lineEdit->text());
 }

@@ -11,6 +11,7 @@ bool ChatServer::startServer(quint16 nPort = 33033)
 {
     tcpServer = new QTcpServer(this);
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
+    DataBase = new UsesDatabase("ServerDB");
     return tcpServer->listen(QHostAddress::Any, nPort);
 }
 

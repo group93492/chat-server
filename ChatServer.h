@@ -5,6 +5,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include "ChatMessages.h"
+#include "usesdatabase.h"
 
 class ChatServer : public QObject
 {
@@ -21,6 +22,7 @@ private:
 public:
     explicit ChatServer(QObject *parent = 0);
     bool startServer(quint16 nPort);
+    UsesDatabase *DataBase;
 signals:
     void logMessage(QString &msg);
 private slots:
