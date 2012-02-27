@@ -38,24 +38,21 @@ void ChatServer::serverGotNewMessage()
         if (pClientSocket->bytesAvailable() < m_nextBlockSize)
             break;
         //message in in <input>, unpack it
-        ChatMessageHeader *header = new ChatMessageHeader();
-        header->unpack(input);
+        ChatMessageHeader *header = new ChatMessageHeader(input);
         ChatMessageType msgType = (ChatMessageType) header->messageType;
         delete header;
         switch (msgType)
         {
         case cmtChannelMessage:
             {
-                ChannelMessage *msg = new ChannelMessage();
-                msg->unpack(input);
+                ChannelMessage *msg = new ChannelMessage(input);
                 processMessage(pClientSocket, msg);
                 delete msg;
                 break;
             }
         case cmtAuthorizationRequest:
             {
-                AuthorizationRequest *msg = new AuthorizationRequest();
-                msg->unpack(input);
+                AuthorizationRequest *msg = new AuthorizationRequest(input);
                 processMessage(pClientSocket, msg);
                 delete msg;
                 break;

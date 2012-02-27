@@ -6,6 +6,13 @@ ChatMessageHeader::ChatMessageHeader(const ChatMessageBody *msgBody)
     messageSize = sizeof(*msgBody);
 }
 
+ChatMessageHeader::ChatMessageHeader(QDataStream &stream)
+{
+    unpack(stream);
+    //bad news that we will fault if stream.status is not ok because
+    //we hadn't any chance to notice about it through constructor
+}
+
 bool ChatMessageHeader::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
@@ -25,6 +32,13 @@ bool ChatMessageHeader::unpack(QDataStream &stream)
 AuthorizationAnswer::AuthorizationAnswer()
 {
     messageType = cmtAuthorizationAnswer;
+}
+
+AuthorizationAnswer::AuthorizationAnswer(QDataStream &stream)
+{
+    unpack(stream);
+    //bad news that we will fault if stream.status is not ok because
+    //we hadn't any chance to notice about it through constructor
 }
 
 bool AuthorizationAnswer::pack(QDataStream &stream) const
@@ -53,6 +67,13 @@ AuthorizationRequest::AuthorizationRequest()
     messageType = cmtAuthorizationRequest;
 }
 
+AuthorizationRequest::AuthorizationRequest(QDataStream &stream)
+{
+    unpack(stream);
+    //bad news that we will fault if stream.status is not ok because
+    //we hadn't any chance to notice about it through constructor
+}
+
 bool AuthorizationRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
@@ -72,6 +93,13 @@ bool AuthorizationRequest::unpack(QDataStream &stream)
 ChannelMessage::ChannelMessage()
 {
     messageType = cmtChannelMessage;
+}
+
+ChannelMessage::ChannelMessage(QDataStream &stream)
+{
+    unpack(stream);
+    //bad news that we will fault if stream.status is not ok because
+    //we hadn't any chance to notice about it through constructor
 }
 
 bool ChannelMessage::pack(QDataStream &stream) const
