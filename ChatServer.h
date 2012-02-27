@@ -10,9 +10,9 @@ class ChatServer : public QObject
 {
     Q_OBJECT
 private:
-    QTcpServer *tcpServer;
-    quint16 nextBlockSize;
-    QMap<QString, QTcpSocket *> clientList;
+    QTcpServer *m_tcpServer;
+    quint16 m_nextBlockSize;
+    QMap<QString, QTcpSocket *> m_clientList;
 
     void processMessage(QTcpSocket *socket, ChannelMessage *msg);
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);

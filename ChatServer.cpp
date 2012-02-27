@@ -2,21 +2,21 @@
 
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
-    nextBlockSize(0)
+    m_nextBlockSize(0)
 {
 
 }
 
 bool ChatServer::startServer(quint16 nPort = 33033)
 {
-    tcpServer = new QTcpServer(this);
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
-    return tcpServer->listen(QHostAddress::Any, nPort);
+    m_tcpServer = new QTcpServer(this);
+    connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
+    return m_tcpServer->listen(QHostAddress::Any, nPort);
 }
 
 void ChatServer::serverGotNewConnection()
 {
-    QTcpSocket *newSocket = tcpServer->nextPendingConnection();
+    QTcpSocket *newSocket = m_tcpServer->nextPendingConnection();
     connect(newSocket, SIGNAL(readyRead()), this, SLOT(serverGotNewMessage()));
     qDebug() << "Server got new connection from" << newSocket->peerAddress().toString() << newSocket->peerPort();
 }
@@ -29,13 +29,13 @@ void ChatServer::serverGotNewMessage()
     input.setVersion(QDataStream::Qt_4_7);
     while (true)
     {
-        if (!nextBlockSize)
+        if (!m_nextBlockSize)
         {
             if (pClientSocket->bytesAvailable() < sizeof(quint16))
                 break;
-            input >> nextBlockSize;
+            input >> m_nextBlockSize;
         }
-        if (pClientSocket->bytesAvailable() < nextBlockSize)
+        if (pClientSocket->bytesAvailable() < m_nextBlockSize)
             break;
         //message in in <input>, unpack it
         ChatMessageHeader *header = new ChatMessageHeader();
@@ -67,7 +67,7 @@ void ChatServer::serverGotNewMessage()
             }
         }
     }
-    nextBlockSize = 0;
+    m_nextBlockSize = 0;
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
@@ -80,8 +80,8 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
             .arg(msg->receiver)
             .arg(msg->messageText);
     emit logMessage(messageText);
-    QMap<QString, QTcpSocket *>::iterator it = clientList.begin();
-    for (; it != clientList.end(); ++it)
+    QMap<QString, QTcpSocket *>::iterator it = m_clientList.begin();
+    for (; it != m_clientList.end(); ++it)
     {
         sendMessageToClient(it.value(), msg);
     }
@@ -103,7 +103,7 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
     if (authResult)
     {
         //add him to client list
-        clientList.insert(msg->username, socket);
+        m_clientList.insert(msg->username, socket);
         emit logMessage(messageText);
         //tell him, that he passed authorization
     }

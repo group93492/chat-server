@@ -7,8 +7,8 @@ StatsWindow::StatsWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
-    server = new ChatServer(this);
-    connect(server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    m_server = new ChatServer(this);
+    connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
 }
 
 StatsWindow::~StatsWindow()
@@ -20,7 +20,7 @@ void StatsWindow::startServer()
 {
     quint16 port = ui->portEdit->text().toUInt();
     QString msg;
-    if (server->startServer(port))
+    if (m_server->startServer(port))
     {
         ui->startButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")

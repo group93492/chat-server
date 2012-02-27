@@ -18,7 +18,7 @@ public:
     
 private:
     Ui::StatsWindow *ui;
-    ChatServer *server;
+    ChatServer *m_server;
 
 private slots:
     void startServer();
