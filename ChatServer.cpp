@@ -93,8 +93,12 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     bool authResult;
     QString messageText;
+    AuthorizationAnswer *answer = new AuthorizationAnswer();
     if(m_clientList.contains(msg->username))
+    {
+        answer->denialReason = QString("User %1 allready authorized on server.").arg(msg->username);
         authResult = false;
+    }
     else
     {
         authResult = true;
@@ -106,7 +110,6 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
                     .arg((authResult) ? " ": " not ")
                     .arg((authResult) ? "i like his name" : "he's fool");
     }
-    AuthorizationAnswer *answer = new AuthorizationAnswer();
     answer->authorizationResult = authResult;
     if (authResult)
     {
@@ -117,7 +120,7 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
     }
     else
     {
-        answer->denialReason = "Invalid username or password";
+        answer->denialReason = "Invalid username or password.";
         //tell him that he hasn't pass authorization
     }
     sendMessageToClient(socket, answer);
