@@ -120,3 +120,30 @@ bool ChannelMessage::unpack(QDataStream &stream)
     stream >> sender >> receiver >> messageText;
     return true;
 }
+
+DisconnectMessage::DisconnectMessage()
+{
+    messageType = cmtDisconnectMessage;
+}
+
+DisconnectMessage::DisconnectMessage(QDataStream &stream)
+{
+    messageType = cmtDisconnectMessage;
+    unpack(stream);
+}
+
+bool DisconnectMessage::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+            return false;
+    stream << sender;
+    return true;
+}
+
+bool DisconnectMessage::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> sender;
+    return true;
+}

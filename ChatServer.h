@@ -16,7 +16,7 @@ private:
 
     void processMessage(QTcpSocket *socket, ChannelMessage *msg);
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);
-
+    void processMessage(QTcpSocket *socket, DisconnectMessage *msg);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody* msgBody);
 
 public:
