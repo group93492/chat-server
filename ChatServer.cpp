@@ -109,20 +109,12 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
                     .arg(msg->password)
                     .arg((authResult) ? " ": " not ")
                     .arg((authResult) ? "i like his name" : "he's fool");
-    }
-    answer->authorizationResult = authResult;
-    if (authResult)
-    {
         //add him to client list
         m_clientList.insert(msg->username, socket);
         emit logMessage(messageText);
         //tell him, that he passed authorization
     }
-    else
-    {
-        answer->denialReason = "Invalid username or password.";
-        //tell him that he hasn't pass authorization
-    }
+    answer->authorizationResult = authResult;
     sendMessageToClient(socket, answer);
     delete answer;
 }
