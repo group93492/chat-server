@@ -14,11 +14,11 @@ SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
             ChatServer.cpp \
-    ChannelList.cpp
+    ClientList.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
             ChatServer.h \
-    ChannelList.h
+    ClientList.h
 
 FORMS    += statswindow.ui
