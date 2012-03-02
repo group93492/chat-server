@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network sql
 
 TARGET = chat-server
 TEMPLATE = app
@@ -14,11 +14,12 @@ SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
             ChatServer.cpp \
-    ClientList.cpp
+    		ClientList.cpp \
+            usesdatabase.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
             ChatServer.h \
-    ClientList.h
+    		usesdatabase.h
 
 FORMS    += statswindow.ui

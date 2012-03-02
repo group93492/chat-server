@@ -23,6 +23,10 @@ private:
 private slots:
     void startServer();
     void logServerMessage(QString &message);
+    void on_watchTableButton_clicked();
+
+signals:
+    void lookTableSgnl(QTableView*, QString);
 };
 
 #endif // STATSWINDOW_H
