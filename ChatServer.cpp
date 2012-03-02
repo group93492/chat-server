@@ -56,6 +56,13 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtDisconnectMessage:
+            {
+                DisconnectMessage *msg = new DisconnectMessage(input);
+                processMessage(pClientSocket, msg);
+                delete msg;
+                break;
+        }
         default:
             {
                 qDebug() << "Server received unknown-typed message";
@@ -84,30 +91,44 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
 void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
 {
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
-    bool authResult = msg->username.contains("yoba", Qt::CaseInsensitive);
-    QString messageText = QString("Received authorization request from %1. He says that his name is %2 and password is %3."
-                        " I think i should%4authorize him because %5.")
-                .arg(socket->peerAddress().toString())
-                .arg(msg->username)
-                .arg(msg->password)
-                .arg((authResult) ? " ": " not ")
-                .arg((authResult) ? "i like his name" : "he's fool");
+    bool authResult;
+    QString messageText;
     AuthorizationAnswer *answer = new AuthorizationAnswer();
-    answer->authorizationResult = authResult;
-    if (authResult)
+    if(m_clientList.contains(msg->username))
     {
+        answer->denialReason = QString("User %1 allready authorized on server.").arg(msg->username);
+        authResult = false;
+    }
+    else
+    {
+        authResult = true;
+        messageText = QString("Received authorization request from %1. He says that his name is %2 and password is %3."
+                            " I think i should%4authorize him because %5.")
+                    .arg(socket->peerAddress().toString())
+                    .arg(msg->username)
+                    .arg(msg->password)
+                    .arg((authResult) ? " ": " not ")
+                    .arg((authResult) ? "i like his name" : "he's fool");
         //add him to client list
         m_clientList.insert(msg->username, socket);
         emit logMessage(messageText);
         //tell him, that he passed authorization
     }
-    else
-    {
-        answer->denialReason = "Invalid username or password";
-        //tell him that he hasn't pass authorization
-    }
+    answer->authorizationResult = authResult;
     sendMessageToClient(socket, answer);
     delete answer;
+}
+
+void ChatServer::processMessage(QTcpSocket *socket, DisconnectMessage *msg)
+{
+    qDebug() << "Server processing disconnect message from:" << msg->sender;
+    QString messageText = msg->sender + " disconnect from server";
+    emit logMessage(messageText);
+    QMap<QString, QTcpSocket *>::iterator it = m_clientList.begin();
+    m_clientList.remove(msg->sender);
+    for (; it != m_clientList.end(); ++it)
+        sendMessageToClient(it.value(), msg);
+    socket->close();
 }
 
 void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody)

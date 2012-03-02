@@ -36,6 +36,7 @@ AuthorizationAnswer::AuthorizationAnswer()
 
 AuthorizationAnswer::AuthorizationAnswer(QDataStream &stream)
 {
+    messageType = cmtAuthorizationAnswer;
     unpack(stream);
     //bad news that we will fault if stream.status is not ok because
     //we hadn't any chance to notice about it through constructor
@@ -69,6 +70,7 @@ AuthorizationRequest::AuthorizationRequest()
 
 AuthorizationRequest::AuthorizationRequest(QDataStream &stream)
 {
+    messageType = cmtAuthorizationRequest;
     unpack(stream);
     //bad news that we will fault if stream.status is not ok because
     //we hadn't any chance to notice about it through constructor
@@ -97,6 +99,7 @@ ChannelMessage::ChannelMessage()
 
 ChannelMessage::ChannelMessage(QDataStream &stream)
 {
+    messageType = cmtChannelMessage;
     unpack(stream);
     //bad news that we will fault if stream.status is not ok because
     //we hadn't any chance to notice about it through constructor
@@ -115,5 +118,32 @@ bool ChannelMessage::unpack(QDataStream &stream)
     if (stream.status() != QDataStream::Ok)
         return false;
     stream >> sender >> receiver >> messageText;
+    return true;
+}
+
+DisconnectMessage::DisconnectMessage()
+{
+    messageType = cmtDisconnectMessage;
+}
+
+DisconnectMessage::DisconnectMessage(QDataStream &stream)
+{
+    messageType = cmtDisconnectMessage;
+    unpack(stream);
+}
+
+bool DisconnectMessage::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+            return false;
+    stream << sender;
+    return true;
+}
+
+bool DisconnectMessage::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> sender;
     return true;
 }
