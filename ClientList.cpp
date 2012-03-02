@@ -110,3 +110,8 @@ void ChannelList::authorizeClientInList(const QString &username, QTcpSocket *soc
     //and add pointer to newClient to every channel in which he is
     m_channelList["main"].addClient(&newClient);
 }
+
+void ChannelList::clientDisconnected(QString &username)
+{
+    //remove client from list
+}
