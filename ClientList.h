@@ -12,24 +12,12 @@ private:
     QTcpSocket *m_userSocket;
 public:
     ConnectedClient(): m_userSocket(NULL) {}
-    QString &username() const;
+    QString &username();
     void setUsername(QString &name);
-    QString &userInfo() const;
+    QString &userInfo();
     void setUserInfo(QString &info);
     QTcpSocket *userSocket() const;
     void setUserSocket(QTcpSocket *socket);
-};
-
-class ClientList
-{
-private:
-     QMap<QString, ConnectedClient> m_usrlist;
-public:
-     ClientList() {}
-     void clientAuthorized(QString &username) const;
-     void addClient(QString &username, QTcpSocket *socket);
-     void deleteClient(QString &username);
-     ConnectedClient &getClient(QString &username) const;
 };
 
 enum ChannelType
@@ -47,26 +35,15 @@ private:
     ChannelType m_channelType;
 public:
     ChatChannel() {}
-    QString &channelName() const;
+    QString &channelName();
     void setChannelName(QString &name);
-    QString &channelDescription() const;
+    QString &channelDescription();
     void setChannelDescription(QString &desc);
     ChannelType getChannelType() const;
     void setChannelType(ChannelType type);
     void addClient(ConnectedClient *clnt);
     void deleteClient(ConnectedClient *clnt);
-    QVectorIterator<ConnectedClient *> &getIterator();
-};
-
-class ChannelList
-{
-private:
-    QMap<QString, ChatChannel> m_chanlist;
-public:
-    ChannelList() {}
-    //read channel list from db
-    //method for adding private channel
-
+//    QVectorIterator<ConnectedClient *> &getIterator();
 };
 
 #endif // CLIENTLIST_H
