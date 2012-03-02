@@ -5,7 +5,7 @@ QString &ConnectedClient::username()
     return m_username;
 }
 
-void ConnectedClient::setUsername(QString &name)
+void ConnectedClient::setUsername(QString name)
 {
     m_username = name;
 }
@@ -15,7 +15,7 @@ QString &ConnectedClient::userInfo()
     return m_userInfo;
 }
 
-void ConnectedClient::setUserInfo(QString &info)
+void ConnectedClient::setUserInfo(QString info)
 {
     m_userInfo = info;
 }
@@ -35,7 +35,7 @@ QString &ChatChannel::channelName()
     return m_channelName;
 }
 
-void ChatChannel::setChannelName(QString &name)
+void ChatChannel::setChannelName(QString name)
 {
     m_channelName = name;
 }
@@ -43,6 +43,11 @@ void ChatChannel::setChannelName(QString &name)
 QString &ChatChannel::channelDescription()
 {
     return m_channelDescriprion;
+}
+
+void ChatChannel::setChannelDescription(QString desc)
+{
+    m_channelDescriprion = desc;
 }
 
 void ChatChannel::addClient(ConnectedClient *clnt)
@@ -56,12 +61,52 @@ void ChatChannel::deleteClient(ConnectedClient *clnt)
     m_usrlist.remove(index);
 }
 
-ChannelType ChatChannel::getChannelType() const
+QStringList ChatChannel::getClientUsernameList()
 {
-    return m_channelType;
+    QStringList usernames;
+    for (int i = 0; i < m_usrlist.count(); i++)
+        usernames.append(m_usrlist[i]->username());
+    return usernames;
 }
 
-void ChatChannel::setChannelType(ChannelType type)
+QString &ChatChannel::channelTopic()
 {
-    m_channelType = type;
+    return m_channelTopic;
+}
+
+void ChatChannel::setChannelTopic(QString topic)
+{
+    m_channelTopic = topic;
+}
+
+void ChannelList::readChannelListFromDB()
+{
+    //open db and read all the channels into m_channelList where key=channelName
+
+    //now there's dummy for creating new main channel
+    ChatChannel newChannel;
+    newChannel.setChannelName(QString("main"));
+    newChannel.setChannelDescription("Kokoko");
+    newChannel.setChannelTopic("GLAVNAYA PETUSHATNYA TUT");
+    m_channelList.insert("main", newChannel);
+}
+
+ChatChannel &ChannelList::getChannel(const QString &channelName)
+{
+    return m_channelList[channelName];
+}
+
+void ChannelList::authorizeClientInList(const QString &username, QTcpSocket *socket)
+{
+    ConnectedClient newClient;
+    //get information about client from db
+    newClient.setUsername(username);
+    newClient.setUserSocket(socket);
+    newClient.setUserInfo(username + " - malaca");
+    //add new client to m_generalClientList
+    m_generalClientList.push_back(newClient);
+    //get all channels in those client recorded from db
+    //nowhere to get
+    //and add pointer to newClient to every channel in which he is
+    m_channelList["main"].addClient(&newClient);
 }
