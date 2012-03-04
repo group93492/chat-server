@@ -5,7 +5,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include "ChatMessages.h"
-#include "usesdatabase.h"
+#include "DBManager.h"
 
 class ChatServer : public QObject
 {
@@ -24,7 +24,7 @@ public:
     enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
     bool startServer(const quint16 nPort);
-    UsesDatabase *DataBase;
+    DBManager *DataBase;
 signals:
     void logMessage(QString &msg);
 
