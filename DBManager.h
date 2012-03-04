@@ -3,9 +3,9 @@
 
 #include <QObject>
 #include "QtSql/QtSql"
-#include <qtableview.h>
+#include <QTableView>
 
-class UsesDatabase : public QObject
+class DBManager: public QObject
 {
     Q_OBJECT
 private:
@@ -15,9 +15,9 @@ private:
     QString TableChannelsName;
     QTableView *tableView;
 public:
-    explicit UsesDatabase(QObject *parent = 0);
-    explicit UsesDatabase(QString);
-    ~UsesDatabase();
+    explicit DBManager(QObject *parent = 0);
+    explicit DBManager(QString);
+    ~DBManager();
     void disconnectBase();
     void createClientsTable();
     void createChannelsTable();

@@ -1,25 +1,25 @@
-#include "usesdatabase.h"
+#include "DBManager.h"
 #include <qtablewidget.h>
 
-UsesDatabase::UsesDatabase(QObject *parent) :
+DBManager::DBManager(QObject *parent) :
     QObject(parent)
 {
 
 }
 
-UsesDatabase::UsesDatabase(QString name)
+DBManager::DBManager(QString name)
 {
     DataBaseName = name;
     TableClientsName = "clients";
     TableChannelsName = "channels";
 }
 
-UsesDatabase::~UsesDatabase()
+DBManager::~DBManager()
 {
     disconnectBase();
 }
 
-void UsesDatabase::connectToBase()
+void DBManager::connectToBase()
 {
     QString msg;
     QFile file;
@@ -57,13 +57,13 @@ void UsesDatabase::connectToBase()
     }
 }
 
-void UsesDatabase::disconnectBase()
+void DBManager::disconnectBase()
 {
     tableView->close();
     DataBase.close();
 }
 
-void UsesDatabase::createClientsTable()
+void DBManager::createClientsTable()
 {
     QString msg;
     QSqlQuery query;
@@ -84,7 +84,7 @@ void UsesDatabase::createClientsTable()
     }
 }
 
-void UsesDatabase::createChannelsTable()
+void DBManager::createChannelsTable()
 {
     QString msg;
     QSqlQuery query;
@@ -105,7 +105,7 @@ void UsesDatabase::createChannelsTable()
     }
 }
 
-void UsesDatabase::lookTable(QTableView *widget, QString tablename)
+void DBManager::lookTable(QTableView *widget, QString tablename)
 {
     tableView = widget;
     QSqlTableModel *model = new QSqlTableModel;
@@ -115,7 +115,7 @@ void UsesDatabase::lookTable(QTableView *widget, QString tablename)
     tableView->setModel(model);
 }
 
-bool UsesDatabase::addNewClient(QString nick, QString password, QString inf)
+bool DBManager::addNewClient(QString nick, QString password, QString inf)
 {
     QString msg;
     QSqlQuery query;
@@ -140,7 +140,7 @@ bool UsesDatabase::addNewClient(QString nick, QString password, QString inf)
 
 }
 
-bool UsesDatabase::addNewChannel(QString name, QString topic)
+bool DBManager::addNewChannel(QString name, QString topic)
 {
     QString msg;
     QSqlQuery query;
@@ -163,7 +163,7 @@ bool UsesDatabase::addNewChannel(QString name, QString topic)
     }
 }
 
-bool UsesDatabase::isClient(QString nick)
+bool DBManager::isClient(QString nick)
 {
     QSqlQuery query;
     QString msg;
@@ -183,7 +183,7 @@ bool UsesDatabase::isClient(QString nick)
             return false;
 }
 
-void UsesDatabase::editInf(QString nick, QString inf)
+void DBManager::editInf(QString nick, QString inf)
 {
     QString msg;
     QSqlQuery query;
@@ -198,7 +198,7 @@ void UsesDatabase::editInf(QString nick, QString inf)
     }
 }
 
-void UsesDatabase::editPass(QString nick, QString password)
+void DBManager::editPass(QString nick, QString password)
 {
     QString msg;
     QSqlQuery query;
@@ -213,7 +213,7 @@ void UsesDatabase::editPass(QString nick, QString password)
     }
 }
 
-void UsesDatabase::editTopic(QString channelname, QString topic)
+void DBManager::editTopic(QString channelname, QString topic)
 {
     QString msg;
     QSqlQuery query;
@@ -228,7 +228,7 @@ void UsesDatabase::editTopic(QString channelname, QString topic)
     }
 }
 
-bool UsesDatabase::authorization(QString nick, QString password)
+bool DBManager::authorization(QString nick, QString password)
 {
     QString msg;
     QSqlQuery query;

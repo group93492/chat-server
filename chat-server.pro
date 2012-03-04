@@ -15,11 +15,11 @@ SOURCES += 	main.cpp\
     		ChatMessages.cpp \
             ChatServer.cpp \
     		ClientList.cpp \
-            usesdatabase.cpp
+    DBManager.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
             ChatServer.h \
-    		usesdatabase.h
+    DBManager.h
 
 FORMS    += statswindow.ui
