@@ -5,7 +5,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include "ChatMessages.h"
-#include "DBManager.h"
+#include "ClientList.h"
 
 class ChatServer : public QObject
 {
@@ -14,6 +14,7 @@ private:
     QTcpServer *m_tcpServer;
     quint16 m_nextBlockSize;
     QMap<QString, QTcpSocket *> m_clientList;
+    GeneralClientList clientList;
 
     void processMessage(QTcpSocket *socket, ChannelMessage *msg);
     void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);

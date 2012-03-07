@@ -7,6 +7,7 @@ ChatServer::ChatServer(QObject *parent) :
 }
 
 bool ChatServer::startServer(const quint16 nPort = defaultPort)
+//start server
 {
     m_tcpServer = new QTcpServer(this);
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
@@ -14,6 +15,9 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
 }
 
 void ChatServer::serverGotNewConnection()
+//activates when server got new incoming connection
+//isn't very important for us, cause server requires authorization
+//so we still waiting authorization/registration request from that son of a bitch
 {
     QTcpSocket *newSocket = m_tcpServer->nextPendingConnection();
     connect(newSocket, SIGNAL(readyRead()), this, SLOT(serverGotNewMessage()));
@@ -21,6 +25,11 @@ void ChatServer::serverGotNewConnection()
 }
 
 void ChatServer::serverGotNewMessage()
+//activates when server receives new message
+//in this method we are reading new message from socket
+//first we read header
+//then we read body of the message and call method
+//that could process message its[message body] type
 {
     qDebug() << "Server received new message";
     QTcpSocket *pClientSocket = (QTcpSocket*)sender();
@@ -74,6 +83,8 @@ void ChatServer::serverGotNewMessage()
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
+//processing channel message
+//we need to reply this message to all clients in channel,
 {
     //got informational message
     //need to reply it to all authorized clients
@@ -89,6 +100,10 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
+//processing authprization request
+//here we need to check whether user exists in table or not
+//YOBA ETO YA, PSHH-PSSHHH
+//and we need to form authorization answer and send it to client
 {
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     bool authResult;
@@ -120,6 +135,13 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, DisconnectMessage *msg)
+//processing disconnect message from client
+//that's simple
+//we need only to delete client from client list
+//and close his socket
+
+//also we should reply disconnect fact in all client's channels
+//TODO:^
 {
     qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " disconnect from server";
@@ -132,6 +154,7 @@ void ChatServer::processMessage(QTcpSocket *socket, DisconnectMessage *msg)
 }
 
 void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody)
+//packing and sending allready formed message to client
 {
     QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
