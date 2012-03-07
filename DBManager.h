@@ -16,23 +16,25 @@ private:
     QTableView *tableView;
 public:
     explicit DBManager(QObject *parent = 0);
-    explicit DBManager(QString);
+    explicit DBManager(QString name);
     ~DBManager();
+    void connectToBase();
     void disconnectBase();
     void createClientsTable();
     void createChannelsTable();
-    void connectToBase();
-    bool addNewClient(QString, QString, QString);
-    bool addNewChannel(QString, QString);
-    bool isClient(QString);
-    void editInf(QString, QString);
-    void editPass(QString, QString);
-    void editTopic(QString, QString);
-    bool authorization(QString, QString);
+    bool addNewClient(QString, QString, QString inf);
+    bool addNewChannel(QString, QString topic);
+    bool isClient(QString nick);
+    void editInf(QString, QString inf);
+    void editPass(QString, QString password);
+    void editTopic(QString channelname, QString);
+    bool authorization(QString nick, QString);
+    //
+
 signals:
     void logMessage(QString&);
 public slots:
-    void lookTable(QTableView *, QString);
+    void lookTable(QTableView *, QString tablename);
 };
 
 #endif // USESDATABASE_H
