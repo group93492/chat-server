@@ -14,7 +14,7 @@ enum ChatMessageType
     cmtDisconnectMessage,
     cmtRegistrationRequest,
     cmtRegistrationAnswer,
-    cmtChannelList,
+    cmtChannelListMessage,
     cmtChannelInfo/*,
     cmtChannelJoinRequest,
     cmtChannelJoinResult*/
@@ -109,7 +109,7 @@ public:
     bool unpack(QDataStream &stream);
 };
 
-class ChannelList: public ChatMessageBody
+class ChannelListMessage: public ChatMessageBody
 {
 public:
     enum ListType
@@ -117,10 +117,9 @@ public:
         listOfJoined,
         listOfAll
     };
-    ChannelList();
-    ChannelList(QDataStream &stream);
+    ChannelListMessage();
+    ChannelListMessage(QDataStream &stream);
     ListType listType;
-    QStringList channelList;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
