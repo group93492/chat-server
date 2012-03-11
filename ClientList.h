@@ -8,7 +8,7 @@
 #include <QtSql>
 #include <QTableView>
 /*
-TODO now:
+TODO:
 classes for client, channel and channel list
 channel list methods for:
 - initialize channel list from database
@@ -19,6 +19,7 @@ channel list methods for:
 /*
 TODO for future:
 - inviting in channels
+- leaving channels
 - private channels
 */
 class ChatClient
@@ -26,6 +27,7 @@ class ChatClient
 private:
     QString m_username;
     QString m_userInfo;
+    QString m_userPassword;
     QTcpSocket *m_userSocket;
 public:
     ChatClient(): m_userSocket(NULL) {}
@@ -33,6 +35,8 @@ public:
     void setUsername(QString name);
     QString &userInfo();
     void setUserInfo(QString info);
+    QString &password();
+    void setPassword(QString pass);
     QTcpSocket *userSocket() const;
     void setUserSocket(QTcpSocket *socket);
 };
@@ -67,25 +71,18 @@ private:
     const QString m_clientTableName;
     const QString m_channelTableName;
     const QString m_membershipTableName;
+    const QString m_DBFileName;
     QTableView *tableView;
 public:
     explicit DBManager(QObject *parent = 0);
-    explicit DBManager(QString name);
     ~DBManager();
-    void connectToBase();
-    void disconnectBase();
+    void connectToDB();
+    void disconnectDB();
     bool createClientsTable();
     bool createChannelsTable();
     bool createMembershipTable();
-    bool addNewClient(QString, QString, QString inf);
-    bool addNewChannel(QString, QString topic);
-    bool isClient(QString nick);
-    void editInf(QString, QString inf);
-    void editPass(QString, QString password);
-    void editTopic(QString channelname, QString);
-    bool authorization(QString nick, QString);
     //general methods
-    void createDatabase();
+    void createDB();
     // client table
     ChatClient *getClient(QString username);
     void setClient(ChatClient &client);
@@ -93,9 +90,8 @@ public:
     ChatChannel *getChannel(QString channelName);
     void setChannel(ChatChannel &channel);
     //membership table
-    bool isClientMemberOfChannel(QString username, QString channelName);
+    bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
-
 signals:
     void logMessage(QString&);
 public slots:
@@ -108,13 +104,15 @@ Q_OBJECT
 private:
     QVector<ChatClient> m_generalClientList;
     QMap<QString, ChatChannel> m_channelList;
+    DBManager m_DB;
 public:
-    explicit GeneralClientList(QObject *parent = 0): QObject(parent) {}
+    explicit GeneralClientList(QObject *parent = 0);
     void readChannelListFromDB();
     ChatChannel &getChannel(const QString &channelName);
-public slots:
-    void authorizeClientInList(const QString &username, QTcpSocket *socket);
-    void clientDisconnected(QString &username);
+    bool isClientAuthorized(QString username);
+    void addClient(const QString &username, QTcpSocket *socket);
+    void removeClient(QString &username);
+    ChatChannel &getChannel(QString channelName);
 };
 
 #endif // CLIENTLIST_H
