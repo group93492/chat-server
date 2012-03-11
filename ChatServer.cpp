@@ -6,7 +6,7 @@ ChatServer::ChatServer(QObject *parent) :
 {
 }
 
-bool ChatServer::startServer(const quint16 nPort = defaultPort)
+bool ChatServer::startServer()
 {
     m_tcpServer = new QTcpServer(this);
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
@@ -64,6 +64,11 @@ void ChatServer::serverGotNewMessage()
         }
     }
     m_nextBlockSize = 0;
+}
+
+void ChatServer::setConfig(ChatServerConfig *pointer)
+{
+    nPort = pointer->port;
 }
 
 void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)

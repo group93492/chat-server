@@ -3,12 +3,13 @@
 ConfigManager::ConfigManager(QObject *parent) :
     QObject(parent)
 {
-    ptr = new ChatServerConfig;
+    p_ChatServerConfig = new ChatServerConfig;
 }
 
 void ConfigManager::ReadConfig()
 {
-    ptr->port = ServerSettings.value("port", 33033).toUInt();
+    p_ChatServerConfig->port = ServerSettings.value("/tcpserver/port", 33033).toUInt();
+    emit ChatServerSignal(p_ChatServerConfig);
 }
 
 void ConfigManager::WriteConfig(QString key, QString value)

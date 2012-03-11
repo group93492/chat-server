@@ -6,10 +6,13 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui(new Ui::StatsWindow)
 {
     ui->setupUi(this);
-    ConfigManager Settings;
+    Settings = new ConfigManager;
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
     m_server = new ChatServer(this);
+    connect(Settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
     connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    Settings->ReadConfig();
+    ui->portEdit->setText(QString::number(Settings->p_ChatServerConfig->port));
 }
 
 StatsWindow::~StatsWindow()
@@ -19,13 +22,13 @@ StatsWindow::~StatsWindow()
 
 void StatsWindow::startServer()
 {
-    quint16 port = ui->portEdit->text().toUInt();
+    Settings->ReadConfig();
     QString msg;
-    if (m_server->startServer(port))
+    if (m_server->startServer())
     {
         ui->startButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")
-                               .arg(QString::number(port));
+                               .arg(Settings->p_ChatServerConfig->port);
         ui->logBrowser->append(msg);
     }
     else

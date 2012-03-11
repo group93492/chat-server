@@ -20,6 +20,7 @@ public:
 private:
     Ui::StatsWindow *ui;
     ChatServer *m_server;
+    ConfigManager *Settings;
 
 private slots:
     void startServer();
