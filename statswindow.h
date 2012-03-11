@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "ChatServer.h"
+#include "configmanager.h"
 
 namespace Ui {
 class StatsWindow;

@@ -6,6 +6,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui(new Ui::StatsWindow)
 {
     ui->setupUi(this);
+    ConfigManager Settings;
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
     m_server = new ChatServer(this);
     connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
