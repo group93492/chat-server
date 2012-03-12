@@ -9,10 +9,14 @@ ConfigManager::ConfigManager(QObject *parent) :
 void ConfigManager::ReadConfig()
 {
     p_ChatServerConfig->port = ServerSettings.value("/tcpserver/port", 33033).toUInt();
+}
+
+void ConfigManager::sendSignals()
+{
     emit ChatServerSignal(p_ChatServerConfig);
 }
 
-void ConfigManager::WriteConfig(QString key, QString value)
+void ConfigManager::WriteConfig()
 {
-    ServerSettings.setValue(key, value);
+    ServerSettings.setValue("/tcpserver/port", p_ChatServerConfig->port);
 }

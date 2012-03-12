@@ -22,7 +22,7 @@ StatsWindow::~StatsWindow()
 
 void StatsWindow::startServer()
 {
-    Settings->ReadConfig();
+    Settings->sendSignals();
     QString msg;
     if (m_server->startServer())
     {
@@ -41,4 +41,14 @@ void StatsWindow::startServer()
 void StatsWindow::logServerMessage(QString &message)
 {
     ui->logBrowser->append(message);
+}
+
+void StatsWindow::on_portEdit_editingFinished()
+{
+    Settings->p_ChatServerConfig->port = ui->portEdit->text().toUInt();
+}
+
+void StatsWindow::on_SettingsButton_clicked()
+{
+    Settings->WriteConfig();
 }

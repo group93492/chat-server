@@ -25,6 +25,8 @@ private:
 private slots:
     void startServer();
     void logServerMessage(QString &message);
+    void on_portEdit_editingFinished();
+    void on_SettingsButton_clicked();
 };
 
 #endif // STATSWINDOW_H

@@ -18,10 +18,11 @@ public:
     explicit ConfigManager(QObject *parent = 0);
     ChatServerConfig *p_ChatServerConfig;
     void ReadConfig();
+    void sendSignals();
 signals:
     void ChatServerSignal(ChatServerConfig *p_ChatServerConfig);
 public slots:
-    void WriteConfig(QString key, QString value);
+    void WriteConfig();
 };
 
 #endif // CONFIGMANAGER_H
