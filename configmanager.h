@@ -16,6 +16,7 @@ private:
     QSettings ServerSettings;
 public:
     explicit ConfigManager(QObject *parent = 0);
+    ~ConfigManager();
     ChatServerConfig *p_ChatServerConfig;
     void ReadConfig();
     void sendSignals();

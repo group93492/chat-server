@@ -6,6 +6,11 @@ ConfigManager::ConfigManager(QObject *parent) :
     p_ChatServerConfig = new ChatServerConfig;
 }
 
+ConfigManager::~ConfigManager()
+{
+    delete p_ChatServerConfig;
+}
+
 void ConfigManager::ReadConfig()
 {
     p_ChatServerConfig->port = ServerSettings.value("/tcpserver/port", 33033).toUInt();

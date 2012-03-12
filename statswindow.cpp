@@ -18,6 +18,8 @@ StatsWindow::StatsWindow(QWidget *parent) :
 StatsWindow::~StatsWindow()
 {
     delete ui;
+    delete m_server;
+    delete Settings;
 }
 
 void StatsWindow::startServer()
