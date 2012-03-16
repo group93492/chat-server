@@ -14,11 +14,13 @@ SOURCES += 	main.cpp\
         	statswindow.cpp \
     		ChatMessages.cpp \
             ChatServer.cpp \
-    configmanager.cpp
+    configmanager.cpp \
+    logger.cpp
 
 HEADERS +=	statswindow.h \
     		ChatMessages.h \
             ChatServer.h \
-    configmanager.h
+    configmanager.h \
+    logger.h
 
 FORMS    += statswindow.ui
