@@ -151,8 +151,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     emit logMessage(messageText);
     QVector<ChannnelList &> channels = clientList.getChannelsForClient(msg->sender);
     for (int i = 0; i < channels.count(); ++i)
-
-
+        sendMessageToChannel(channel);
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)

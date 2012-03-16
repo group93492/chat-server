@@ -338,7 +338,7 @@ ChatClient &GeneralClientList::getClient(const QString &username)
     return m_generalClientList.value(username);
 }
 
-bool GeneralClientList::isClientAuthorized(QString username)
+bool GeneralClientList::hasClient(QString username)
 {
     return m_generalClientList.contains(username);
 }
@@ -365,7 +365,12 @@ void GeneralClientList::removeClient(QString &username)
 
 QStringList &GeneralClientList::getChannelsForClient(QString username)
 {
-    for
+    QStringList channels;
+    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
+    for (; channelIt != m_channelList.end(); channelIt++)
+        if (channelIt.value().hasClient(username))
+            channels.append(channelIt.key());
+    return channels;
 }
 
 ChatChannel &GeneralClientList::getChannel(QString channelName)
@@ -378,18 +383,52 @@ GeneralClientList::GeneralClientList(QObject *parent): QObject(parent)
     readChannelsFromDB();
 }
 
-void GeneralClientList::authorize(QString username, QString password)
+GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QString password)
 {
-
+    //comparing authorization data
+    if (this->hasClient(usename))
+        return GeneralClientList::arAllreadyAuthorized;
+    ChatClient newClient = m_DB.getClient(username);
+    if (!newClient)
+        return GeneralClientList::arWrongAuthData;
+    if (password != newClient.password())
+        return GeneralClientList::arWrongAuthData;
+    //ok, authorization passed
+    //add client to general list
+    m_generalClientList.insert(newClient.username(), newClient);
+    //and add him to channel lists
+    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
+    for (; channelIt != m_channelList.end(); channelIt++)
+        if (m_DB.isMembership(newClient.username(), channelIt.value().name()))
+            channelIt.value().addClient(newClient);
+    //ok, thats all
+    return GeneralClientList::arAuthSuccess;
 }
 
-void GeneralClientList::disconnect(QString username, QString password)
+void GeneralClientList::disconnect(QString username)
 {
+    if (!this->hasClient(username))
+        return;
+    m_generalClientList.value(username).userSocket()->close;
     //socket->close();
+    //delete client from channels
+    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
+    for (; channelIt != m_channelList.end(); channelIt++)
+        if (channelIt.value().hasClient(username))
+            channelIt.value().deleteClient(username);
+    //delete client from general list
+    m_generalClientList.remove(username);
 }
 
 void GeneralClientList::joinChannel(QString username, QString channelName)
 {
+    if (!hasClient(username)) //joining channel supported only for connected clients
+        return;
+    if (m_DB.isMembership(username, channelName)) // we dont need to join channel if we are allready in it
+        return;
+    m_DB.addMembership(username, channelName);
+    m_channelList.value(channelName).addClient(m_generalClientList.value(username));
+    //we need to refresh list of channel membership on client-part
 }
 
 void GeneralClientList::leaveChannel(QString username, QString channelName)

@@ -75,14 +75,14 @@ private:
     const QString m_membershipTableName;
     const QString m_DBFileName;
     QTableView *tableView;
+    bool createClientsTable();
+    bool createChannelsTable();
+    bool createMembershipTable();
 public:
     explicit DBManager(QObject *parent = 0);
     ~DBManager();
     void connectToDB();
     void disconnectDB();
-    bool createClientsTable();
-    bool createChannelsTable();
-    bool createMembershipTable();
     //general methods
     void createDB();
     // client table
@@ -114,18 +114,18 @@ public:
     {
         arAllreadyAuthorized,
         arAuthSuccess,
-        arAuthError
+        arWrongAuthData
     };
     explicit GeneralClientList(QObject *parent = 0);
     ChatChannel &getChannel(const QString &channelName);
     ChatClient &getClient(const QString &username);
-    bool isClientAuthorized(QString username);
+    bool hasClient(QString username);
     void addClient(const QString &username, QTcpSocket *socket);
     void removeClient(QString &username);
     QStringList &getChannelsForClient(QString username);
 
     AuthResult authorize(QString username, QString password);
-    void disconnect(QString username, QString password);
+    void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
 };
