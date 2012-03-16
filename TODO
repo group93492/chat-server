@@ -1,6 +1,16 @@
-Improve client list
-Channel support
-Database support
-Configuration support
-Server GUI
-Logger
+Tasks:
+- Implement client list
+- Channel support (joining, leaving channel)
+- Database for client list support
+- Configuration files support
+- Improve server GUI, make it more comfortable to use
+-- GUI includes:
+--- Active clients list. Features like kick or ban client
+--- Channel list
+--- DB Monitor. Look all the tables, add/edit/delete the values in tables.
+--- Settings manager, edit the server config file in GUI.
+--- Log Browser
+- Create logger unit for server
+- Ignore-lists feature for every client
+- Ban possibility
+- Refactoring, Testing, Bugfixing
