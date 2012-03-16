@@ -60,23 +60,20 @@ void ChatChannel::setChannelDescription(QString desc)
     m_description = desc;
 }
 
-void ChatChannel::addClient(ChatClient *clnt)
+void ChatChannel::addClient(ChatClient &clnt)
 {
-    m_usrlist.push_back(clnt);
+    userList.push_back(clnt);
 }
 
-void ChatChannel::deleteClient(ChatClient *clnt)
+void ChatChannel::deleteClient(ChatClient &clnt)
 {
     quint16 index = m_usrlist.indexOf(clnt);
-    m_usrlist.remove(index);
+    userList.remove(index);
 }
 
-QStringList ChatChannel::getClientUsernameList()
+bool ChatChannel::hasClient(QString username)
 {
-    QStringList usernames;
-    for (int i = 0; i < m_usrlist.count(); i++)
-        usernames.append(m_usrlist[i]->username());
-    return usernames;
+    return userList.contains(username);
 }
 
 QString &ChatChannel::topic()
@@ -336,6 +333,11 @@ ChatChannel &GeneralClientList::getChannel(const QString &channelName)
     return m_channelList[channelName];
 }
 
+ChatClient &GeneralClientList::getClient(const QString &username)
+{
+    return m_generalClientList.value(username);
+}
+
 bool GeneralClientList::isClientAuthorized(QString username)
 {
     return m_generalClientList.contains(username);
@@ -361,6 +363,11 @@ void GeneralClientList::removeClient(QString &username)
     //remove client from list
 }
 
+QStringList &GeneralClientList::getChannelsForClient(QString username)
+{
+    for
+}
+
 ChatChannel &GeneralClientList::getChannel(QString channelName)
 {
     return m_channelList.value(channelName);
@@ -368,5 +375,27 @@ ChatChannel &GeneralClientList::getChannel(QString channelName)
 
 GeneralClientList::GeneralClientList(QObject *parent): QObject(parent)
 {
+    readChannelsFromDB();
+}
 
+void GeneralClientList::authorize(QString username, QString password)
+{
+
+}
+
+void GeneralClientList::disconnect(QString username, QString password)
+{
+    //socket->close();
+}
+
+void GeneralClientList::joinChannel(QString username, QString channelName)
+{
+}
+
+void GeneralClientList::leaveChannel(QString username, QString channelName)
+{
+}
+
+void GeneralClientList::readChannelsFromDB()
+{
 }

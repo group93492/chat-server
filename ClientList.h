@@ -7,6 +7,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QtSql>
 #include <QTableView>
+#include "ChatMessages.h"
 /*
 TODO:
 classes for client, channel and channel list
@@ -47,8 +48,10 @@ private:
     QString m_name;
     QString m_description;
     QString m_topic;
-    QVector<ChatClient *> m_usrlist;
 public:
+    QVector<ChatClient &> userList;
+    // should be private. but i couldn't find a nice way to provide
+    // an interface to iterate all the clients in the channel
     ChatChannel() {}
     QString &name();
     void setName(QString name);
@@ -56,10 +59,9 @@ public:
     void setDescription(QString desc);
     QString &topic();
     void setTopic(QString topic);
-    void addClient(ChatClient *clnt);
-    void deleteClient(ChatClient *clnt);
-    QStringList getClientUsernameList();
-//    QVectorIterator<ConnectedClient *> &getIterator();
+    void addClient(ChatClient &clnt);
+    void deleteClient(ChatClient &clnt);
+    bool hasClient(QString username);
 };
 
 class DBManager: public QObject
@@ -92,6 +94,7 @@ public:
     //membership table
     bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
+    //methods for receiving lists
 signals:
     void logMessage(QString&);
 public slots:
@@ -102,17 +105,29 @@ class GeneralClientList: public QObject
 {
 Q_OBJECT
 private:
-    QVector<ChatClient> m_generalClientList;
+    QMap<QString, ChatClient> m_generalClientList;
     QMap<QString, ChatChannel> m_channelList;
     DBManager m_DB;
+    void readChannelsFromDB();
 public:
+    enum AuthResult
+    {
+        arAllreadyAuthorized,
+        arAuthSuccess,
+        arAuthError
+    };
     explicit GeneralClientList(QObject *parent = 0);
-    void readChannelListFromDB();
     ChatChannel &getChannel(const QString &channelName);
+    ChatClient &getClient(const QString &username);
     bool isClientAuthorized(QString username);
     void addClient(const QString &username, QTcpSocket *socket);
     void removeClient(QString &username);
-    ChatChannel &getChannel(QString channelName);
+    QStringList &getChannelsForClient(QString username);
+
+    AuthResult authorize(QString username, QString password);
+    void disconnect(QString username, QString password);
+    void joinChannel(QString username, QString channelName);
+    void leaveChannel(QString username, QString channelName);
 };
 
 #endif // CLIENTLIST_H
