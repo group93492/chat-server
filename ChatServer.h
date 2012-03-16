@@ -16,10 +16,11 @@ private:
     QMap<QString, QTcpSocket *> m_clientList;
     GeneralClientList clientList;
 
-    void processMessage(QTcpSocket *socket, ChannelMessage *msg);
-    void processMessage(QTcpSocket *socket, AuthorizationRequest *msg);
-    void processMessage(QTcpSocket *socket, DisconnectMessage *msg);
-    void sendMessageToClient(QTcpSocket *socket, ChatMessageBody* msgBody);
+    void processMessage(ChannelMessage *msg);
+    void processMessage(AuthorizationRequest *msg);
+    void processMessage(DisconnectMessage *msg);
+    void sendMessageToClient(QString username, ChatMessageBody *msgBody);
+    void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);
 
 public:
     enum { defaultPort = 33033 };
