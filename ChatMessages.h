@@ -120,19 +120,21 @@ public:
     ChannelListMessage();
     ChannelListMessage(QDataStream &stream);
     ListType listType;
+    QStringList channelList;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
 
 //maybe server should send information about every channel in the channel list, not in the other message?
-class ChannelInfo: public ChatMessageBody
+class ChannelInfoMessage: public ChatMessageBody
 {
 public:
-    ChannelInfo();
-    ChannelInfo(QDataStream &stream);
+    ChannelInfoMessage();
+    ChannelInfoMessage(QDataStream &stream);
     QString channelName;
     QString channelDescription;
     QString channelTopic;
+    QStringList channelMembers;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

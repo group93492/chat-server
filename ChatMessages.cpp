@@ -221,27 +221,45 @@ ChannelListMessage::ChannelListMessage(QDataStream &stream)
 
 bool ChannelListMessage::pack(QDataStream &stream) const
 {
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << listType << channelList;
+    return true;
 }
 
 bool ChannelListMessage::unpack(QDataStream &stream)
 {
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> listType >> channelList;
+    return true;
 }
 
-ChannelInfo::ChannelInfo()
+ChannelInfoMessage::ChannelInfoMessage()
 {
     messageType = cmtChannelInfo;
 }
 
-ChannelInfo::ChannelInfo(QDataStream &stream)
+ChannelInfoMessage::ChannelInfoMessage(QDataStream &stream)
 {
     messageType = cmtChannelInfo;
     unpack(stream);
 }
 
-bool ChannelInfo::pack(QDataStream &stream) const
+bool ChannelInfoMessage::pack(QDataStream &stream) const
 {
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << channelName << channelDescription << channelTopic;
+    stream << channelMembers;
+    return true;
 }
 
-bool ChannelInfo::unpack(QDataStream &stream)
+bool ChannelInfoMessage::unpack(QDataStream &stream)
 {
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> channelName >> channelDescription >> channelTopic;
+    stream >> channelMembers;
+    return true;
 }
