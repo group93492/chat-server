@@ -214,11 +214,25 @@ void DBManager::createDB()
     setChannel(channel);
 }
 
-ChatClient *DBManager::getClient(QString username)
+bool DBManager::hasClient(QString username)
 {
-    ChatClient *client = NULL;
     QSqlQuery query;
-    QString str = QString("SELECT name, password, info FROM '%1'' WHERE name = '%2';")
+    QString str = QString("SELECT * FROM '%1' WHERE name = '%2';")
+                    .arg(m_clientTableName)
+                    .arg(username);
+    if (!query.exec(str))
+    {
+        emit logMessage(QString("SQL query error in getting client: %1").arg(query.lastError().text()));
+    }
+    else
+        return query.next();
+}
+
+ChatClient &DBManager::getClient(QString username)
+{
+    ChatClient client;
+    QSqlQuery query;
+    QString str = QString("SELECT name, password, info FROM '%1' WHERE name = '%2';")
                     .arg(m_clientTableName)
                     .arg(username);
     if (!query.exec(str) || !query.next())
@@ -229,10 +243,9 @@ ChatClient *DBManager::getClient(QString username)
     {
         // create new client and fill it with results of query
         // maybe we should use smart pointer here
-        client = new ChatClient;
-        client->setUsername(query.value(0).toString());
-        client->setPassword(query.value(1).toString());
-        client->setUserInfo(query.value(2).toString());
+        client.setUsername(query.value(0).toString());
+        client.setPassword(query.value(1).toString());
+        client.setUserInfo(query.value(2).toString());
     }
     return client;
 }
@@ -252,9 +265,23 @@ void DBManager::setClient(ChatClient &client)
         emit logMessage(QString("SQL query error in setting client: %1").arg(query.lastError().text()));
 }
 
-ChatChannel *DBManager::getChannel(QString channelName)
+bool DBManager::hasChannel(QString channelName)
 {
-    ChatChannel *channel= NULL;
+    QSqlQuery query;
+    QString str = QString("SELECT * FROM '%1' WHERE name = '%2';")
+                    .arg(m_channelTableName)
+                    .arg(channelName);
+    if (!query.exec(str))
+    {
+        emit logMessage(QString("SQL query error in getting channel: %1").arg(query.lastError().text()));
+    }
+    else
+        return query.next();
+}
+
+ChatChannel &DBManager::getChannel(QString channelName)
+{
+    ChatChannel channel;
     QSqlQuery query;
     QString str = QString("SELECT name, topic, description FROM '%1' WHERE name = '%2';")
                     .arg(m_channelTableName)
@@ -267,12 +294,11 @@ ChatChannel *DBManager::getChannel(QString channelName)
     {
         // create new client and fill it with results of query
         // maybe we should use smart pointer here
-        channel = new ChatChannel;
-        channel->setName(query.value(0).toString());
-        channel->setTopic(query.value(1).toString());
-        channel->setDescription(query.value(2).toString());
+        channel.setName(query.value(0).toString());
+        channel.setTopic(query.value(1).toString());
+        channel.setDescription(query.value(2).toString());
     }
-    return client;
+    return channel;
 }
 
 void DBManager::setChannel(ChatChannel &channel)
@@ -316,6 +342,27 @@ void DBManager::addMembership(QString username, QString channelName)
         emit logMessage(QString("SQL query error adding membership: %1").arg(query.lastError().text()));
 }
 
+QMap<QString, ChatChannel> &DBManager::getChannelList()
+{
+    QMap<QString, ChatChannel> channels;
+    ChatChannel tempChannel;
+    QSqlQuery query;
+    QString q = QString("SELECT name, description, topic FROM %1")
+                        .arg(m_membershipTableName);
+    if (!query.exec(q) || !(query.next()))
+    {
+        emit logMessage(QString("SQL query error getting channels: %1").arg(query.lastError().text()));
+        return false;
+    }
+    do
+    {
+        tempChannel.setName(query.value(0).toString());
+        tempChannel.setDescription(query.value(1).toString());
+        tempChannel.setTopic(query.value(2).toString());
+    } while (query.next());
+    return channels;
+}
+
 void GeneralClientList::readChannelListFromDB()
 {
     //open db and read all the channels into m_channelList where key=channelName
@@ -355,7 +402,6 @@ void GeneralClientList::addClient(const QString &username, QTcpSocket *socket)
     //get all channels in those client recorded from db
     //nowhere to get
     //and add pointer to newClient to every channel in which he is
-    m_channelList["main"].addClient(&newClient);
 }
 
 void GeneralClientList::removeClient(QString &username)
@@ -373,6 +419,27 @@ QStringList &GeneralClientList::getChannelsForClient(QString username)
     return channels;
 }
 
+GeneralClientList::RegResult GeneralClientList::registrate(QString username, QString password)
+{
+    if (m_DB.hasClient(username))
+        return GeneralClientList::rrOccupiedUsername;
+    //check username for not conflicting with our architecture
+    //if conflicts - return GeneralClientList::rrBadUsername
+    ChatClient newClient;
+    newClient.setUsername(username);
+    newClient.setPassword(password);
+    newClient.setUserInfo(username + " - MALACA");  //default userinfo
+    m_DB.setClient(newClient);
+    m_DB.addMembership(username, "main");
+    //
+    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
+    for (; channelIt != m_channelList.end(); channelIt++)
+        if (!channelIt.value().hasClient(username))
+            m_DB.addMembership(username, channelIt.value().name());
+    //
+    return GeneralClientList::rrRegSuccess;
+}
+
 ChatChannel &GeneralClientList::getChannel(QString channelName)
 {
     return m_channelList.value(channelName);
@@ -380,26 +447,29 @@ ChatChannel &GeneralClientList::getChannel(QString channelName)
 
 GeneralClientList::GeneralClientList(QObject *parent): QObject(parent)
 {
-    readChannelsFromDB();
+    //readChannelsFromDB();
 }
 
-GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QString password)
+GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QString password, QTcpSocket *socket)
 {
     //comparing authorization data
+    //if client is allready authorized - abort
     if (this->hasClient(usename))
         return GeneralClientList::arAllreadyAuthorized;
-    ChatClient newClient = m_DB.getClient(username);
-    if (!newClient)
+    //if the client doesn't exists in our DB - abort
+    if (!m_DB.hasClient(username))
         return GeneralClientList::arWrongAuthData;
-    if (password != newClient.password())
+    ChatClient authClient = m_DB.getClient(username);
+    if (password != authClient.password())
         return GeneralClientList::arWrongAuthData;
     //ok, authorization passed
     //add client to general list
-    m_generalClientList.insert(newClient.username(), newClient);
+    authClient.setUserSocket(socket);
+    m_generalClientList.insert(username, authClient);
     //and add him to channel lists
     QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
     for (; channelIt != m_channelList.end(); channelIt++)
-        if (m_DB.isMembership(newClient.username(), channelIt.value().name()))
+        if (m_DB.isMembership(username, channelIt.value().name()))
             channelIt.value().addClient(newClient);
     //ok, thats all
     return GeneralClientList::arAuthSuccess;
@@ -437,4 +507,5 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
 
 void GeneralClientList::readChannelsFromDB()
 {
+    m_channelList = m_DB.getChannelList();
 }

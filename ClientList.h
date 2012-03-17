@@ -86,15 +86,19 @@ public:
     //general methods
     void createDB();
     // client table
-    ChatClient *getClient(QString username);
+    bool hasClient(QString username);
+    ChatClient &getClient(QString username);
     void setClient(ChatClient &client);
+
     // channel table
-    ChatChannel *getChannel(QString channelName);
+    bool hasChannel(QString channelName);
+    ChatChannel &getChannel(QString channelName);
     void setChannel(ChatChannel &channel);
     //membership table
     bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
-    //methods for receiving lists
+    // methods for initializing channels in general client list
+    QMap<QString, ChatChannel> &getChannelList();
 signals:
     void logMessage(QString&);
 public slots:
@@ -108,7 +112,6 @@ private:
     QMap<QString, ChatClient> m_generalClientList;
     QMap<QString, ChatChannel> m_channelList;
     DBManager m_DB;
-    void readChannelsFromDB();
 public:
     enum AuthResult
     {
@@ -116,7 +119,14 @@ public:
         arAuthSuccess,
         arWrongAuthData
     };
+    enum RegResult
+    {
+        rrBadUsername,
+        rrOccupiedUsername,
+        rrRegSuccess
+    };
     explicit GeneralClientList(QObject *parent = 0);
+    void readChannelsFromDB();
     ChatChannel &getChannel(const QString &channelName);
     ChatClient &getClient(const QString &username);
     bool hasClient(QString username);
@@ -124,10 +134,12 @@ public:
     void removeClient(QString &username);
     QStringList &getChannelsForClient(QString username);
 
-    AuthResult authorize(QString username, QString password);
+    RegResult registrate(QString username, QString password);
+    AuthResult authorize(QString username, QString password, QTcpSocket *socket);
     void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
-    void leaveChannel(QString username, QString channelName);
+    void leaveChannel(QString username, QString channelName);//
+
 };
 
 #endif // CLIENTLIST_H
