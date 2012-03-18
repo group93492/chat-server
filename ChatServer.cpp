@@ -255,7 +255,7 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
 {
     if (!clientList.hasChannel(channelName))
         return;
-    QByteArray arrBlock;
+    /*QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
     output.setVersion(QDataStream::Qt_4_7);
     output << quint16(0);
@@ -263,12 +263,12 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
     header->pack(output);
     msgBody->pack(output);
     delete header;
-    output << quint16(arrBlock.size() - sizeof(quint16));
+    output << quint16(arrBlock.size() - sizeof(quint16));*/
 
     ChatChannel channel = clientList.getChannel(channelName);
     for (int i = 0; i < channel.userList.count(); i++)
     {
-        //sendMessageToClient(channel.userList[i]->username(), msg);
-        channel.userList[i]->userSocket()->write(arrBlock);
+        sendMessageToClient(channel.userList[i], msgBody);
+        /*channel.userList[i]->userSocket()->write(arrBlock);*/
     }
 }

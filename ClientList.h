@@ -49,7 +49,7 @@ private:
     QString m_description;
     QString m_topic;
 public:
-    QVector<ChatClient *> userList;
+    QStringList userList;
     // should be private. but i couldn't find a nice way to provide
     // an interface to iterate all the clients in the channel
     ChatChannel() {}
@@ -59,7 +59,7 @@ public:
     void setDescription(QString desc);
     QString &topic();
     void setTopic(QString topic);
-    void addClient(ChatClient *clnt);
+    void addClient(QString username);
     void deleteClient(QString username);
     bool hasClient(QString username);
 };

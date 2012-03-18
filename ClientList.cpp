@@ -60,31 +60,19 @@ void ChatChannel::setDescription(QString desc)
     m_description = desc;
 }
 
-void ChatChannel::addClient(ChatClient *clnt)
+void ChatChannel::addClient(QString username)
 {
-    userList.push_back(clnt);
+    userList.append(username);
 }
 
 void ChatChannel::deleteClient(QString username)
 {
-    for (int i = 0; i < userList.count(); i++)
-        if (username == userList[i]->username())
-        {
-            userList.remove(i);
-            break;
-        }
+    userList.removeAll(username);
 }
 
 bool ChatChannel::hasClient(QString username)
 {
-    bool found = false;
-    for (int i = 0; i < userList.count(); i++)
-        if (username == userList[i]->username())
-        {
-            found = true;
-            break;
-        }
-    return found;
+    return userList.contains(username);
 }
 
 QString &ChatChannel::topic()
@@ -458,7 +446,7 @@ GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QSt
     QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
     for (; channelIt != m_channelList.end(); channelIt++)
         if (m_DB.isMembership(username, channelIt.value().name()))
-            channelIt.value().addClient(authClient);
+            channelIt.value().addClient(authClient.username());
     //ok, thats all
     return GeneralClientList::arAuthSuccess;
 }
@@ -485,12 +473,15 @@ void GeneralClientList::joinChannel(QString username, QString channelName)
     if (m_DB.isMembership(username, channelName)) // we dont need to join channel if we are allready in it
         return;
     m_DB.addMembership(username, channelName);
-    m_channelList.value(channelName).addClient(m_generalClientList.value(username));
+    ChatChannel chan = m_channelList.take(channelName);
+    chan.addClient(username);
+    m_channelList.insert(channelName, chan);
     //we need to refresh list of channel membership on client-part
 }
 
 void GeneralClientList::leaveChannel(QString username, QString channelName)
 {
+
 }
 
 void GeneralClientList::readChannelsFromDB()
