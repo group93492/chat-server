@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "ChatServer.h"
 #include "configmanager.h"
+#include "logger.h"
 
 namespace Ui {
 class StatsWindow;
@@ -21,6 +22,7 @@ private:
     Ui::StatsWindow *ui;
     ChatServer *m_server;
     ConfigManager *Settings;
+    Logger *logs;
 
 private slots:
     void startServer();

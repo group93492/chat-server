@@ -11,6 +11,12 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_server = new ChatServer(this);
     connect(Settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
     connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    logs = new Logger(this);
+    connect(logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    logs->SetSettings("Log"); //temporary
+    logs->StartLogger();
+    logs->AddToChannelLog("main", "Welcome!");
+    logs->AddToServerLog(Minor, "Server Start");
     Settings->ReadConfig();
     ui->portEdit->setText(QString::number(Settings->p_ChatServerConfig->port));
 }
@@ -20,6 +26,7 @@ StatsWindow::~StatsWindow()
     delete ui;
     delete m_server;
     delete Settings;
+    delete logs;
 }
 
 void StatsWindow::startServer()
