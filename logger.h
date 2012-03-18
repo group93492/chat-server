@@ -5,6 +5,7 @@
 #include <QMultiMap>
 #include <QFile>
 #include <QDir>
+#include <QTextStream>
 
 enum ErrorStatus{
     Minor,

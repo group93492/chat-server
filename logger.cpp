@@ -41,10 +41,12 @@ void Logger::AddToChannelLog(QString ChannelName, QString Message)
             }
         }
         m_ListOfLogs.insert(ChannelName, file);
+        QTextStream out(m_ListOfLogs.value(ChannelName));
+        out << Message << "\n";
     }
     else
     {
-        QDataStream out(m_ListOfLogs.value(ChannelName));
+        QTextStream out(m_ListOfLogs.value(ChannelName));
         out << Message << "\n";
     }
 }
@@ -71,10 +73,12 @@ void Logger::AddToServerLog(ErrorStatus Status, QString Message)
             }
         }
         m_ListOfLogs.insert("server", file);
+        QTextStream out(m_ListOfLogs.value("server"));
+        out << Message << "\n";
     }
     else
     {
-        QDataStream out(m_ListOfLogs.value("server"));
+        QTextStream out(m_ListOfLogs.value("server"));
         out << "[" << Status << "]" << Message << "\n";
     }
 }
@@ -94,8 +98,7 @@ void Logger::StartLogger()
     }
     else
     {
-        QString msg;
-        msg = "Unable use directory with name: " + m_Path;
-        emit logMessage(msg);
+        m_Dir->cd(m_Path);
+        QDir::setCurrent(m_Path);
     }
 }

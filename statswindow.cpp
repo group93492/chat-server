@@ -13,10 +13,11 @@ StatsWindow::StatsWindow(QWidget *parent) :
     connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
     logs = new Logger(this);
     connect(logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
-    logs->SetSettings("Log"); //temporary
+    logs->SetSettings("Logs"); //temporary
     logs->StartLogger();
     logs->AddToChannelLog("main", "Welcome!");
     logs->AddToServerLog(Minor, "Server Start");
+    logs->AddToChannelLog("main", "first message");
     Settings->ReadConfig();
     ui->portEdit->setText(QString::number(Settings->p_ChatServerConfig->port));
 }
