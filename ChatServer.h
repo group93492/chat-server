@@ -17,7 +17,7 @@ private:
     GeneralClientList clientList;
 
     void processMessage(ChannelMessage *msg);
-    void processMessage(AuthorizationRequest *msg);
+    void processMessage(AuthorizationRequest *msg, QTcpSocket *socket);
     void processMessage(DisconnectMessage *msg);
     void processMessage(RegistrationRequest *msg, QTcpSocket *socket);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);

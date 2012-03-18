@@ -223,7 +223,7 @@ bool ChannelListMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;
-    stream << listType << channelList;
+    stream << quint8(listType) << channelList;
     return true;
 }
 
@@ -231,7 +231,9 @@ bool ChannelListMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
         return false;
-    stream >> listType >> channelList;
+    quint8 tempType;
+    stream >> tempType >> channelList;
+    listType = (ChannelListMessage::ListType) tempType;
     return true;
 }
 

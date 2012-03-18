@@ -66,7 +66,7 @@ void ChatServer::serverGotNewMessage()
         case cmtAuthorizationRequest:
             {
                 AuthorizationRequest *msg = new AuthorizationRequest(input);
-                processMessage(msg);
+                processMessage(msg, pClientSocket);
                 delete msg;
                 break;
             }
@@ -80,7 +80,7 @@ void ChatServer::serverGotNewMessage()
         case cmtRegistrationRequest:
             {
                 RegistrationRequest *msg = new RegistrationRequest(input);
-                processMessage(msg);
+                processMessage(msg, pClientSocket);
                 delete msg;
                 break;
             }
@@ -115,7 +115,7 @@ void ChatServer::processMessage(ChannelMessage *msg)
     sendMessageToChannel(msg->receiver, msg);
 }
 
-void ChatServer::processMessage(AuthorizationRequest *msg)
+void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
 //processing authorization request
 //here we need to check whether user exists in table or not
 //YOBA ETO YA, PSHH-PSSHHH
@@ -128,7 +128,7 @@ void ChatServer::processMessage(AuthorizationRequest *msg)
     }
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     AuthorizationAnswer *answer = new AuthorizationAnswer();
-    switch (clientList.authorize(msg->username, msg->password))
+    switch (clientList.authorize(msg->username, msg->password, socket))
     {
     case GeneralClientList::arAllreadyAuthorized:
         {
@@ -169,9 +169,9 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " was disconnected from server";
     emit logMessage(messageText);
-    QVector<ChannnelList &> channels = clientList.getChannelsForClient(msg->sender);
+    QStringList channels = clientList.getChannelsForClient(msg->sender);
     for (int i = 0; i < channels.count(); ++i)
-        sendMessageToChannel(channel.name(), msg);
+        sendMessageToChannel(channels[i], msg);
 }
 
 void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
@@ -253,7 +253,7 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
 //send message *msgBody to all clients, which are in channel <channelName>
 //needed for replying channel and other messages for all channel
 {
-    if (!m_channelList.contains(channelName))
+    if (!clientList.hasChannel(channelName))
         return;
     QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
@@ -265,7 +265,7 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
     delete header;
     output << quint16(arrBlock.size() - sizeof(quint16));
 
-    const ChatChannel &channel = m_channelList.value(channelName);
+    ChatChannel channel = clientList.getChannel(channelName);
     for (int i = 0; i < channel.userList.count(); i++)
     {
         //sendMessageToClient(channel.userList[i]->username(), msg);

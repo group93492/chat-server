@@ -49,7 +49,7 @@ private:
     QString m_description;
     QString m_topic;
 public:
-    QVector<ChatClient &> userList;
+    QVector<ChatClient *> userList;
     // should be private. but i couldn't find a nice way to provide
     // an interface to iterate all the clients in the channel
     ChatChannel() {}
@@ -59,8 +59,8 @@ public:
     void setDescription(QString desc);
     QString &topic();
     void setTopic(QString topic);
-    void addClient(ChatClient &clnt);
-    void deleteClient(ChatClient &clnt);
+    void addClient(ChatClient *clnt);
+    void deleteClient(QString username);
     bool hasClient(QString username);
 };
 
@@ -87,18 +87,18 @@ public:
     void createDB();
     // client table
     bool hasClient(QString username);
-    ChatClient &getClient(QString username);
+    ChatClient getClient(QString username);
     void setClient(ChatClient &client);
 
     // channel table
     bool hasChannel(QString channelName);
-    ChatChannel &getChannel(QString channelName);
+    ChatChannel getChannel(QString channelName);
     void setChannel(ChatChannel &channel);
     //membership table
     bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
     // methods for initializing channels in general client list
-    QMap<QString, ChatChannel> &getChannelList();
+    QMap<QString, ChatChannel> getChannelList();
 signals:
     void logMessage(QString&);
 public slots:
@@ -127,12 +127,11 @@ public:
     };
     explicit GeneralClientList(QObject *parent = 0);
     void readChannelsFromDB();
-    ChatChannel &getChannel(const QString &channelName);
-    ChatClient &getClient(const QString &username);
+    ChatChannel getChannel(QString &channelName);
+    bool hasChannel(QString channelName);
+    ChatClient getClient(const QString &username);
     bool hasClient(QString username);
-    void addClient(const QString &username, QTcpSocket *socket);
-    void removeClient(QString &username);
-    QStringList &getChannelsForClient(QString username);
+    QStringList getChannelsForClient(QString username);
 
     RegResult registrate(QString username, QString password);
     AuthResult authorize(QString username, QString password, QTcpSocket *socket);
