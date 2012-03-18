@@ -74,7 +74,7 @@ void Logger::AddToServerLog(ErrorStatus Status, QString Message)
         }
         m_ListOfLogs.insert("server", file);
         QTextStream out(m_ListOfLogs.value("server"));
-        out << Message << "\n";
+        out << "[" << Status << "]" << Message << "\n";
     }
     else
     {

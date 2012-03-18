@@ -15,6 +15,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     connect(logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
     logs->SetSettings("Logs"); //temporary
     logs->StartLogger();
+    logs->AddToServerLog(Minor, "olololo");
     Settings->ReadConfig();
     ui->portEdit->setText(QString::number(Settings->p_ChatServerConfig->port));
 }
