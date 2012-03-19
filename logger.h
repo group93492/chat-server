@@ -8,17 +8,18 @@
 #include <QTextStream>
 
 enum ErrorStatus{
-    Minor,
-    Warning,
-    Critical,
-    Fatal
+    esNotify,
+    esMinor,
+    esWarning,
+    esCritical,
+    esFatal
 };
 
 class Logger : public QObject
 {
     Q_OBJECT
 private:
-    QMultiMap<QString, QFile *> m_ListOfLogs;
+    QMap<QString, QFile *> m_ListOfLogs;
     QDir *m_Dir;
     QString m_Path;
 public:
