@@ -21,8 +21,10 @@ Logger::~Logger()
 
 void Logger::AddToChannelLog(QString ChannelName, QString Message)
 {
+    if(m_currentDay != QDate::currentDate().day())
+        changeFolder();
     QString outMsg;
-    outMsg = "[" + Time.toString("hh:mm:ss") + "]";
+    outMsg = "[" + QTime::currentTime().toString("hh:mm:ss") + "]";
     if(!m_ListOfLogs.contains(ChannelName))
     {
         QFile *file = new QFile(ChannelName + ".txt");
@@ -53,8 +55,10 @@ void Logger::AddToChannelLog(QString ChannelName, QString Message)
 
 void Logger::AddToServerLog(ErrorStatus Status, QString Message)
 {
+    if(m_currentDay != QDate::currentDate().day())
+        changeFolder();
     QString outMsg;
-    outMsg = "[" + Time.toString("hh:mm:ss") + "]";
+    outMsg = "[" + QTime::currentTime().toString("hh:mm:ss") + "]";
     if(!m_ListOfLogs.contains("server"))
     {
         QFile *file = new QFile("server.txt");
@@ -76,7 +80,7 @@ void Logger::AddToServerLog(ErrorStatus Status, QString Message)
                 return;
             }
         }
-        m_ListOfLogs.insert("server", file);      
+        m_ListOfLogs.insert("server", file);
     }
     QTextStream out(m_ListOfLogs.value("server"));
     outMsg = outMsg + "[" + Status + "]" + Message; //FIXME: Status
@@ -92,10 +96,9 @@ void Logger::SetSettings(QString path)
 
 void Logger::StartLogger()
 {
-    Time = QTime::currentTime();
-    QDate Date = QDate::currentDate();
     QString currentDate;
-    currentDate = Date.toString("dd.MM.yyyy");
+    currentDate = QDate::currentDate().toString("dd.MM.yyyy");
+    m_currentDay = QDate::currentDate().day();
     if(!m_Dir->cd(m_Path)) //create log directory
     {
         m_Dir->mkdir(m_Path);
@@ -114,7 +117,20 @@ void Logger::StartLogger()
     {
         m_Dir->cd(currentDate);
     }
-    QDir::setCurrent(m_Path + "/" + currentDate);
+    QDir::setCurrent(m_Dir->absolutePath());
+}
+
+void Logger::changeFolder()
+{
+    m_ListOfLogs.clear();
+    m_Dir->makeAbsolute();
+    m_Dir->cdUp();
+    QString currentDate;
+    currentDate = QDate::currentDate().toString("dd.MM.yyyy");
+    m_Dir->mkdir(currentDate);
+    m_Dir->cd(currentDate);
+    m_currentDay++;
+    QDir::setCurrent(m_Dir->absolutePath());
 }
 
 

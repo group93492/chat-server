@@ -7,7 +7,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QTime>
-#include <QDate>
+#include <QDateTime>
 
 enum ErrorStatus{
     esNotify,
@@ -24,7 +24,8 @@ private:
     QMap<QString, QFile *> m_ListOfLogs;
     QDir *m_Dir;
     QString m_Path;
-    QTime Time;
+    quint8 m_currentDay;
+    void changeFolder();
 public:
     explicit Logger(QObject *parent = 0);
     ~Logger();
