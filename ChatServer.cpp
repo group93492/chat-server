@@ -80,7 +80,7 @@ void ChatServer::processMessage(QTcpSocket *socket, ChannelMessage *msg)
             .arg(msg->sender)
             .arg(msg->receiver)
             .arg(msg->messageText);
-    emit logMessage(messageText);
+    emit serverLog(esNotify, messageText);
     QMap<QString, QTcpSocket *>::iterator it = m_clientList.begin();
     for (; it != m_clientList.end(); ++it)
         sendMessageToClient(it.value(), msg);
@@ -103,7 +103,7 @@ void ChatServer::processMessage(QTcpSocket *socket, AuthorizationRequest *msg)
     {
         //add him to client list
         m_clientList.insert(msg->username, socket);
-        emit logMessage(messageText);
+        emit serverLog(esNotify, messageText);
         //tell him, that he passed authorization
     }
     else

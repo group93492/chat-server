@@ -6,6 +6,7 @@
 #include <QtNetwork/QTcpSocket>
 #include "ChatMessages.h"
 #include "configmanager.h"
+#include "logger.h"
 
 class ChatServer : public QObject
 {
@@ -26,7 +27,8 @@ public:
     bool startServer();
 
 signals:
-    void logMessage(QString &msg);
+    void serverLog(ErrorStatus, QString &message);
+    void channelLog(QString &name, QString &message);
 
 private slots:
     void serverGotNewConnection();

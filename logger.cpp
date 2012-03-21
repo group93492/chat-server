@@ -19,7 +19,7 @@ Logger::~Logger()
     delete m_Dir;
 }
 
-void Logger::AddToChannelLog(QString ChannelName, QString Message)
+void Logger::AddToChannelLog(QString &ChannelName, QString &Message)
 {
     if(m_currentDay != QDate::currentDate().day())
         changeFolder();
@@ -53,7 +53,7 @@ void Logger::AddToChannelLog(QString ChannelName, QString Message)
     out << outMsg;
 }
 
-void Logger::AddToServerLog(ErrorStatus Status, QString Message)
+void Logger::AddToServerLog(ErrorStatus Status, QString &Message)
 {
     if(m_currentDay != QDate::currentDate().day())
         changeFolder();

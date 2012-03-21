@@ -21,8 +21,8 @@ public:
 private:
     Ui::StatsWindow *ui;
     ChatServer *m_server;
-    ConfigManager *Settings;
-    Logger *logs;
+    ConfigManager *m_settings;
+    Logger *m_logs;
 
 private slots:
     void startServer();

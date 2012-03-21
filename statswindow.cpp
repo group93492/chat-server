@@ -6,36 +6,37 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui(new Ui::StatsWindow)
 {
     ui->setupUi(this);
-    Settings = new ConfigManager;
-    connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
+    m_settings = new ConfigManager;
     m_server = new ChatServer(this);
-    connect(Settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
-    connect(m_server, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
-    logs = new Logger(this);
-    connect(logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
-    logs->SetSettings("Logs"); //temporary
-    logs->StartLogger();
-    Settings->ReadConfig();
-    ui->portEdit->setText(QString::number(Settings->p_ChatServerConfig->port));
+    m_logs = new Logger(this);
+    connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
+    connect(m_settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
+    connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
+    connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
+    connect(m_logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    m_logs->SetSettings("Logs"); //temporary
+    m_logs->StartLogger();
+    m_settings->ReadConfig();
+    ui->portEdit->setText(QString::number(m_settings->p_ChatServerConfig->port));
 }
 
 StatsWindow::~StatsWindow()
 {
     delete ui;
     delete m_server;
-    delete Settings;
-    delete logs;
+    delete m_settings;
+    delete m_logs;
 }
 
 void StatsWindow::startServer()
 {
-    Settings->sendSignals();
+    m_settings->sendSignals();
     QString msg;
     if (m_server->startServer())
     {
         ui->startButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")
-                               .arg(Settings->p_ChatServerConfig->port);
+                               .arg(m_settings->p_ChatServerConfig->port);
         ui->logBrowser->append(msg);
     }
     else
@@ -52,10 +53,10 @@ void StatsWindow::logServerMessage(QString &message)
 
 void StatsWindow::on_portEdit_editingFinished()
 {
-    Settings->p_ChatServerConfig->port = ui->portEdit->text().toUInt();
+    m_settings->p_ChatServerConfig->port = ui->portEdit->text().toUInt();
 }
 
 void StatsWindow::on_SettingsButton_clicked()
 {
-    Settings->WriteConfig();
+    m_settings->WriteConfig();
 }

@@ -30,12 +30,12 @@ public:
     explicit Logger(QObject *parent = 0);
     ~Logger();
 signals:
-    void logMessage(QString &);
+    void logMessage(QString &msg);
 public slots:
-    void SetSettings(QString);
+    void SetSettings(QString path);
     void StartLogger();
-    void AddToChannelLog(QString, QString);
-    void AddToServerLog(ErrorStatus, QString);
+    void AddToChannelLog(QString &name, QString &message);
+    void AddToServerLog(ErrorStatus, QString &message);
 };
 
 #endif // LOGGER_H
