@@ -2,10 +2,12 @@
 #define LOGGER_H
 
 #include <QObject>
-#include <QMultiMap>
+#include <QMap>
 #include <QFile>
 #include <QDir>
 #include <QTextStream>
+#include <QTime>
+#include <QDate>
 
 enum ErrorStatus{
     esNotify,
@@ -22,6 +24,7 @@ private:
     QMap<QString, QFile *> m_ListOfLogs;
     QDir *m_Dir;
     QString m_Path;
+    QTime Time;
 public:
     explicit Logger(QObject *parent = 0);
     ~Logger();

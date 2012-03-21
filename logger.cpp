@@ -90,15 +90,30 @@ void Logger::SetSettings(QString path)
 
 void Logger::StartLogger()
 {
-    if(!m_Dir->cd(m_Path))
+    Time = QTime::currentTime();
+    QDate Date = QDate::currentDate();
+    QString currentDate;
+    currentDate = Date.toString("dd.MM.yyyy");
+    if(!m_Dir->cd(m_Path)) //create log directory
     {
         m_Dir->mkdir(m_Path);
         m_Dir->cd(m_Path);
-        QDir::setCurrent(m_Path);
     }
     else
     {
         m_Dir->cd(m_Path);
-        QDir::setCurrent(m_Path);
     }
+    if(!m_Dir->cd(currentDate)) //create directory for specific date
+    {
+        m_Dir->mkdir(currentDate);
+        m_Dir->cd(currentDate);
+    }
+    else
+    {
+        m_Dir->cd(currentDate);
+    }
+    QDir::setCurrent(m_Path + "/" + currentDate);
 }
+
+
+
