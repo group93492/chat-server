@@ -10,17 +10,18 @@
 #include <QDateTime>
 
 enum ErrorStatus{
-    esNotify,
-    esMinor,
-    esWarning,
-    esCritical,
-    esFatal
+    esNotify = 0,
+    esMinor = 1,
+    esWarning = 2,
+    esCritical = 3,
+    esFatal = 4
 };
 
 class Logger : public QObject
 {
     Q_OBJECT
 private:
+    QString arrayOfES[5];
     QMap<QString, QFile *> m_ListOfLogs;
     QDir *m_Dir;
     QString m_Path;

@@ -4,6 +4,11 @@ Logger::Logger(QObject *parent) :
     QObject(parent)
 {
     m_Dir = new QDir();
+    arrayOfES[0] = "Notify";
+    arrayOfES[1] = "Minor";
+    arrayOfES[2] = "Warning";
+    arrayOfES[3] = "Critical";
+    arrayOfES[4] = "Fatal";
 }
 
 Logger::~Logger()
@@ -83,7 +88,7 @@ void Logger::AddToServerLog(ErrorStatus Status, QString &Message)
         m_ListOfLogs.insert("server", file);
     }
     QTextStream out(m_ListOfLogs.value("server"));
-    outMsg = outMsg + "[" + Status + "]" + Message; //FIXME: Status
+    outMsg = outMsg + "[" + arrayOfES[Status] + "]" + Message;
     emit logMessage(outMsg);
     outMsg += "\n";
     out << outMsg;
