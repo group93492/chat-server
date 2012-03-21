@@ -21,6 +21,8 @@ Logger::~Logger()
 
 void Logger::AddToChannelLog(QString ChannelName, QString Message)
 {
+    QString outMsg;
+    outMsg = "[" + Time.toString("hh:mm:ss") + "]";
     if(!m_ListOfLogs.contains(ChannelName))
     {
         QFile *file = new QFile(ChannelName + ".txt");
@@ -30,6 +32,7 @@ void Logger::AddToChannelLog(QString ChannelName, QString Message)
             {
                 QString msg = "Unable open log file: " + file->fileName();
                 emit logMessage(msg);
+                return;
             }
         }
         else
@@ -38,21 +41,20 @@ void Logger::AddToChannelLog(QString ChannelName, QString Message)
             {
                 QString msg = "Unable open log file: " + file->fileName();
                 emit logMessage(msg);
+                return;
             }
         }
         m_ListOfLogs.insert(ChannelName, file);
-        QTextStream out(m_ListOfLogs.value(ChannelName));
-        out << Message << "\n";
     }
-    else
-    {
-        QTextStream out(m_ListOfLogs.value(ChannelName));
-        out << Message << "\n";
-    }
+    QTextStream out(m_ListOfLogs.value(ChannelName));
+    outMsg += Message + "\n";
+    out << outMsg;
 }
 
 void Logger::AddToServerLog(ErrorStatus Status, QString Message)
 {
+    QString outMsg;
+    outMsg = "[" + Time.toString("hh:mm:ss") + "]";
     if(!m_ListOfLogs.contains("server"))
     {
         QFile *file = new QFile("server.txt");
@@ -62,6 +64,7 @@ void Logger::AddToServerLog(ErrorStatus Status, QString Message)
             {
                 QString msg = "Unable open server log file";
                 emit logMessage(msg);
+                return;
             }
         }
         else
@@ -70,17 +73,16 @@ void Logger::AddToServerLog(ErrorStatus Status, QString Message)
             {
                 QString msg = "Unable open server log file";
                 emit logMessage(msg);
+                return;
             }
         }
-        m_ListOfLogs.insert("server", file);
-        QTextStream out(m_ListOfLogs.value("server"));
-        out << "[" << Status << "]" << Message << "\n";
+        m_ListOfLogs.insert("server", file);      
     }
-    else
-    {
-        QTextStream out(m_ListOfLogs.value("server"));
-        out << "[" << Status << "]" << Message << "\n";
-    }
+    QTextStream out(m_ListOfLogs.value("server"));
+    outMsg = outMsg + "[" + Status + "]" + Message; //FIXME: Status
+    emit logMessage(outMsg);
+    outMsg += "\n";
+    out << outMsg;
 }
 
 void Logger::SetSettings(QString path)
