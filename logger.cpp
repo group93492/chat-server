@@ -90,6 +90,7 @@ void Logger::AddToServerLog(ErrorStatus Status, QString &Message)
     QTextStream out(m_ListOfLogs.value("server"));
     outMsg = outMsg + "[" + arrayOfES[Status] + "]" + Message;
     emit logMessage(outMsg);
+    qDebug() << outMsg;
     outMsg += "\n";
     out << outMsg;
 }
@@ -109,17 +110,9 @@ void Logger::StartLogger()
         m_Dir->mkdir(m_Path);
         m_Dir->cd(m_Path);
     }
-    else
-    {
-        m_Dir->cd(m_Path);
-    }
     if(!m_Dir->cd(currentDate)) //create directory for specific date
     {
         m_Dir->mkdir(currentDate);
-        m_Dir->cd(currentDate);
-    }
-    else
-    {
         m_Dir->cd(currentDate);
     }
     QDir::setCurrent(m_Dir->absolutePath());

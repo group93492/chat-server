@@ -37,13 +37,14 @@ void StatsWindow::startServer()
         ui->startButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")
                                .arg(m_settings->p_ChatServerConfig->port);
-        ui->logBrowser->append(msg);
+        m_logs->AddToServerLog(esNotify, msg);
     }
     else
     {
         msg = "Unable to start server.";
-        logServerMessage(msg);
+        m_logs->AddToServerLog(esFatal, msg);
     }
+
 }
 
 void StatsWindow::logServerMessage(QString &message)

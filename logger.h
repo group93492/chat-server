@@ -7,7 +7,8 @@
 #include <QDir>
 #include <QTextStream>
 #include <QTime>
-#include <QDateTime>
+#include <QDate>
+#include <QDebug>
 
 enum ErrorStatus{
     esNotify = 0,
