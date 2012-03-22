@@ -26,6 +26,7 @@ private:
     QMap<QString, QFile *> m_ListOfLogs;
     QDir *m_Dir;
     QString m_Path;
+    QString m_currentLog;
     quint8 m_currentDay;
     void changeFolder();
 public:
@@ -33,11 +34,13 @@ public:
     ~Logger();
 signals:
     void logMessage(QString &msg);
+    void addToListOfLogs(QStringList list);
 public slots:
     void SetSettings(QString path);
     void StartLogger();
     void AddToChannelLog(QString &name, QString &message);
     void AddToServerLog(ErrorStatus, QString &message);
+    void currentLog(QString str);
 };
 
 #endif // LOGGER_H

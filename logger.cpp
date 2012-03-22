@@ -1,4 +1,5 @@
 #include "logger.h"
+#include <QDebug>
 
 Logger::Logger(QObject *parent) :
     QObject(parent)
@@ -54,7 +55,10 @@ void Logger::AddToChannelLog(QString &ChannelName, QString &Message)
         m_ListOfLogs.insert(ChannelName, file);
     }
     QTextStream out(m_ListOfLogs.value(ChannelName));
-    outMsg += Message + "\n";
+    outMsg += Message;
+    if(QString(ChannelName + ".txt") == m_currentLog)
+        emit logMessage(outMsg);
+    outMsg += "\n";
     out << outMsg;
 }
 
@@ -89,10 +93,16 @@ void Logger::AddToServerLog(ErrorStatus Status, QString &Message)
     }
     QTextStream out(m_ListOfLogs.value("server"));
     outMsg = outMsg + "[" + arrayOfES[Status] + "]" + Message;
-    emit logMessage(outMsg);
+    if(QString("server.txt") == m_currentLog)
+        emit logMessage(outMsg);
     qDebug() << outMsg;
     outMsg += "\n";
     out << outMsg;
+}
+
+void Logger::currentLog(QString str)
+{
+    m_currentLog = str;
 }
 
 void Logger::SetSettings(QString path)
@@ -116,6 +126,10 @@ void Logger::StartLogger()
         m_Dir->cd(currentDate);
     }
     QDir::setCurrent(m_Dir->absolutePath());
+    QStringList List;
+    m_Dir->makeAbsolute();
+    List = m_Dir->entryList(QDir::Files, QDir::Name);
+    emit addToListOfLogs(List);
 }
 
 void Logger::changeFolder()

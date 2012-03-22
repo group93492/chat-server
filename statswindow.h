@@ -29,6 +29,8 @@ private slots:
     void logServerMessage(QString &message);
     void on_portEdit_editingFinished();
     void on_SettingsButton_clicked();
+    void addToComboBox(QStringList List);
+    void on_logsBox_currentIndexChanged(const QString &arg1);
 };
 
 #endif // STATSWINDOW_H

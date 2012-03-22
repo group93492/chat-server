@@ -14,6 +14,8 @@ StatsWindow::StatsWindow(QWidget *parent) :
     connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
     connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
     connect(m_logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+    connect(m_logs, SIGNAL(addToListOfLogs(QStringList)), this, SLOT(addToComboBox(QStringList)));
+    connect(ui->logsBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
     m_logs->SetSettings("Logs"); //temporary
     m_logs->StartLogger();
     m_settings->ReadConfig();
@@ -60,4 +62,18 @@ void StatsWindow::on_portEdit_editingFinished()
 void StatsWindow::on_SettingsButton_clicked()
 {
     m_settings->WriteConfig();
+}
+
+void StatsWindow::addToComboBox(QStringList List)
+{
+    ui->logsBox->addItems(List);
+}
+
+void StatsWindow::on_logsBox_currentIndexChanged(const QString &arg1)
+{
+    QFile file(arg1);
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
+    ui->logBrowser->clear();
+    ui->logBrowser->append(in.readAll());
 }
