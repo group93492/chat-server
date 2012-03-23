@@ -31,6 +31,7 @@ private slots:
     void on_SettingsButton_clicked();
     void addToComboBox(QStringList List);
     void on_logsBox_currentIndexChanged(const QString &arg1);
+    void on_dateEdit_dateChanged(const QDate &date);
 };
 
 #endif // STATSWINDOW_H

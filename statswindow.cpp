@@ -6,6 +6,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui(new Ui::StatsWindow)
 {
     ui->setupUi(this);
+    ui->dateEdit->setDate(QDate::currentDate());
     m_settings = new ConfigManager;
     m_server = new ChatServer(this);
     m_logs = new Logger(this);
@@ -76,4 +77,27 @@ void StatsWindow::on_logsBox_currentIndexChanged(const QString &arg1)
     QTextStream in(&file);
     ui->logBrowser->clear();
     ui->logBrowser->append(in.readAll());
+}
+
+void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
+{
+    QDir Dir;
+    Dir.setCurrent(QDir::currentPath());
+    Dir.makeAbsolute();
+    Dir.cdUp();
+    if(Dir.cd(date.toString("dd.MM.yyyy")))
+    {
+        QStringList List;
+        List = Dir.entryList(QDir::Files, QDir::Name);
+        ui->logsBox->clear();
+        ui->logsBox->addItems(List);
+        QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        qDebug() << Dir.path();
+        file.open(QIODevice::ReadOnly);
+        QTextStream in(&file);
+        ui->logBrowser->clear();
+        ui->logBrowser->append(in.readAll());
+    }
+    else
+        ui->logBrowser->clear();
 }
