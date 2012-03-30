@@ -74,7 +74,6 @@ private:
     const QString m_channelTableName;
     const QString m_membershipTableName;
     const QString m_DBFileName;
-    QTableView *tableView;
     bool createClientsTable();
     bool createChannelsTable();
     bool createMembershipTable();
@@ -98,11 +97,11 @@ public:
     bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
     // methods for initializing channels in general client list
-    QMap<QString, ChatChannel> getChannelList();
+    QVector<ChatChannel> getChannelList();
 signals:
     void logMessage(QString&);
 public slots:
-    void lookTable(QTableView *, QString tablename);
+   /*void lookTable(QTableView *, QString tablename);*/
 };
 
 class GeneralClientList: public QObject
@@ -110,7 +109,7 @@ class GeneralClientList: public QObject
 Q_OBJECT
 private:
     QMap<QString, ChatClient> m_generalClientList;
-    QMap<QString, ChatChannel> m_channelList;
+    QVector<ChatChannel> m_channelList;
     DBManager m_DB;
 public:
     enum AuthResult
@@ -137,8 +136,11 @@ public:
     AuthResult authorize(QString username, QString password, QTcpSocket *socket);
     void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
-    void leaveChannel(QString username, QString channelName);//
-
+    void leaveChannel(QString username, QString channelName);
+signals:
+    void logMessage(QString &);
+private slots:
+    void replyLog(QString &param);
 };
 
 #endif // CLIENTLIST_H

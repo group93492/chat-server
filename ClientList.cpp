@@ -85,7 +85,6 @@ void ChatChannel::setTopic(QString topic)
     m_topic = topic;
 }
 
-
 DBManager::DBManager(QObject *parent) :
     QObject(parent),
     m_clientTableName("clients"),
@@ -95,7 +94,6 @@ DBManager::DBManager(QObject *parent) :
 {
     connectToDB();
 }
-
 
 DBManager::~DBManager()
 {
@@ -131,8 +129,8 @@ void DBManager::connectToDB()
 
 void DBManager::disconnectDB()
 {
-    if (tableView)
-        tableView->close();
+    /*if (tableView)
+        tableView->close();*/
     m_DB.close();
 }
 
@@ -169,7 +167,7 @@ bool DBManager::createMembershipTable()
     return query.exec(str);
 }
 
-void DBManager::lookTable(QTableView *widget, QString tablename)
+/*void DBManager::lookTable(QTableView *widget, QString tablename)
 {
     tableView = widget;
     QSqlTableModel *model = new QSqlTableModel;
@@ -177,20 +175,21 @@ void DBManager::lookTable(QTableView *widget, QString tablename)
     model->select();
     model->setEditStrategy(QSqlTableModel::OnFieldChange);
     tableView->setModel(model);
-}
+}*/
 
 void DBManager::createDB()
 {
 
+    QString msg;
     if (!createClientsTable() ||
         !createChannelsTable() ||
         !createMembershipTable())
-    {
-        QString msg = "Error creating tables";
-        emit logMessage(msg);
-    }
+        msg = "Error creating tables";
+    else
+        msg = "Tables 'clients', 'channels', 'membership' created succesfully";
+    emit logMessage(msg);
     ChatChannel channel;
-    channel.setName("Main");
+    channel.setName("main");
     channel.setDescription("Main channel, contains all users");
     channel.setTopic("Gimme fu, gimme fai, gimme dabajabazza");
     setChannel(channel);
@@ -335,7 +334,7 @@ bool DBManager::isMembership(QString username, QString channelName)
 void DBManager::addMembership(QString username, QString channelName)
 {
     QSqlQuery query;
-    QString q = QString("INSERT INTO %1 (rowid, channel, client) "
+    QString q = QString("INSERT INTO %1 (rowid, client, channel) "
                         "VALUES (null, '%2', '%3')")
                         .arg(m_membershipTableName)
                         .arg(username)
@@ -348,37 +347,47 @@ void DBManager::addMembership(QString username, QString channelName)
     }
 }
 
-QMap<QString, ChatChannel> DBManager::getChannelList()
+QVector<ChatChannel> DBManager::getChannelList()
 {
-    QMap<QString, ChatChannel> channels;
+    QVector<ChatChannel> channels;
     ChatChannel tempChannel;
     QSqlQuery query;
     QString q = QString("SELECT name, description, topic FROM %1")
-                        .arg(m_membershipTableName);
+                        .arg(m_channelTableName);
     if (!query.exec(q) || !(query.next()))
     {
         QString msg("SQL query error in getting channel list: %1");
         msg.arg(query.lastError().text());
         emit logMessage(msg);
+//        return channels;
     }
     do
     {
         tempChannel.setName(query.value(0).toString());
         tempChannel.setDescription(query.value(1).toString());
         tempChannel.setTopic(query.value(2).toString());
-        channels.insert(tempChannel.name(), tempChannel);
+        channels.append(tempChannel);
     } while (query.next());
     return channels;
 }
 
 ChatChannel GeneralClientList::getChannel(QString &channelName)
 {
-    return m_channelList.value(channelName);
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (m_channelList[i].name() == channelName)
+            return m_channelList[i];
 }
 
 bool GeneralClientList::hasChannel(QString channelName)
 {
-    return m_channelList.contains(channelName);
+    bool found = false;
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (m_channelList[i].name() == channelName)
+        {
+            found = true;
+            break;
+        }
+    return found;
 }
 
 ChatClient GeneralClientList::getClient(const QString &username)
@@ -394,10 +403,9 @@ bool GeneralClientList::hasClient(QString username)
 QStringList GeneralClientList::getChannelsForClient(QString username)
 {
     QStringList channels;
-    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
-    for (; channelIt != m_channelList.end(); channelIt++)
-        if (channelIt.value().hasClient(username))
-            channels.append(channelIt.key());
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (m_DB.isMembership(username, m_channelList[i].name()))
+            channels.append(m_channelList[i].name());
     return channels;
 }
 
@@ -412,11 +420,10 @@ GeneralClientList::RegResult GeneralClientList::registrate(QString username, QSt
     newClient.setPassword(password);
     newClient.setUserInfo(username + " - MALACA");  //default userinfo
     m_DB.setClient(newClient);
-    //m_DB.addMembership(username, "main");
+//    m_DB.addMembership(username, "main");
     //autojoining all channels - shold be deleted soon
-    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
-    for (; channelIt != m_channelList.end(); channelIt++)
-        joinChannel(username, channelIt.key());
+    for (int i = 0; i < m_channelList.count(); ++i)
+        joinChannel(username, m_channelList[i].name());
     //
     return GeneralClientList::rrRegSuccess;
 }
@@ -424,29 +431,30 @@ GeneralClientList::RegResult GeneralClientList::registrate(QString username, QSt
 GeneralClientList::GeneralClientList(QObject *parent): QObject(parent)
 {
     //readChannelsFromDB();
+    connect(&m_DB, SIGNAL(logMessage(QString &)), this, SLOT(replyLog(QString&)));
 }
 
 GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QString password, QTcpSocket *socket)
 {
     //comparing authorization data
-    //if client is allready authorized - abort
-    if (this->hasClient(username))
-        return GeneralClientList::arAllreadyAuthorized;
     //if the client doesn't exists in our DB - abort
     if (!m_DB.hasClient(username))
         return GeneralClientList::arWrongAuthData;
+    //if password is incorrect - abort
     ChatClient authClient = m_DB.getClient(username);
     if (password != authClient.password())
         return GeneralClientList::arWrongAuthData;
+    //if client is allready authorized - abort
+    if (this->hasClient(username))
+        return GeneralClientList::arAllreadyAuthorized;
     //ok, authorization tests passed
     //add client to general list
     authClient.setUserSocket(socket);
     m_generalClientList.insert(username, authClient);
     //and add him to channel lists
-    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
-    for (; channelIt != m_channelList.end(); channelIt++)
-        if (m_DB.isMembership(username, channelIt.value().name()))
-            channelIt.value().addClient(authClient.username());
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (m_DB.isMembership(username, m_channelList[i].name()))
+            m_channelList[i].addClient(username);
     //ok, thats all
     return GeneralClientList::arAuthSuccess;
 }
@@ -458,30 +466,37 @@ void GeneralClientList::disconnect(QString username)
     m_generalClientList.value(username).userSocket()->close();
     //socket->close();
     //delete client from channels
-    QMap<QString, ChatChannel>::iterator channelIt = m_channelList.begin();
-    for (; channelIt != m_channelList.end(); channelIt++)
-        if (channelIt.value().hasClient(username))
-            channelIt.value().deleteClient(username);
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (m_channelList[i].hasClient(username))
+            m_channelList[i].deleteClient(username);
     //delete client from general list
     m_generalClientList.remove(username);
 }
 
 void GeneralClientList::joinChannel(QString username, QString channelName)
 {
-    if (!hasClient(username)) //joining channel supported only for connected clients
-        return;
+    /*if (!hasClient(username)) //joining channel supported only for connected clients
+        return;*/
     if (m_DB.isMembership(username, channelName)) // we dont need to join channel if we are allready in it
         return;
     m_DB.addMembership(username, channelName);
-    ChatChannel chan = m_channelList.take(channelName);
-    chan.addClient(username);
-    m_channelList.insert(channelName, chan);
+    for (int i = 0; i < m_channelList.count(); ++i)
+        if (channelName == m_channelList[i].name())
+        {
+            m_channelList[i].addClient(username);
+            break;
+        }
     //we need to refresh list of channel membership on client-part
 }
 
 void GeneralClientList::leaveChannel(QString username, QString channelName)
 {
 
+}
+
+void GeneralClientList::replyLog(QString &param)
+{
+    emit logMessage(param);
 }
 
 void GeneralClientList::readChannelsFromDB()
