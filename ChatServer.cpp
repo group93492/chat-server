@@ -87,8 +87,7 @@ void ChatServer::serverGotNewMessage()
         default:
             {
                 qDebug() << "Server received unknown-typed message" << msgType;
-                /*m_nextBlockSize = 0;
-                return;*/
+                break;
             }
         }
         m_nextBlockSize = 0;
@@ -153,16 +152,18 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
             answer->authorizationResult = true;
             break;
         }
-    }
-    sendMessageToClient(msg->username, answer);
+    }    
     if (answer->authorizationResult)
     {
+        sendMessageToClient(msg->username, answer);
         ChannelListMessage *channelsMsg = new ChannelListMessage();
         channelsMsg->channelList = clientList.getChannelsForClient(msg->username);
         channelsMsg->listType = ChannelListMessage::listOfJoined;
         sendMessageToClient(msg->username, channelsMsg);
         delete channelsMsg;
     }
+    else
+        sendMessageToClient(socket, answer);
     delete answer;
 }
 
