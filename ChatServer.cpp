@@ -12,9 +12,9 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
 {
     m_tcpServer = new QTcpServer(this);
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
-
     //create client list, load this bastard from db
     //clientList = GeneralClientList;
+    connect(&clientList, SIGNAL(logMessage(QString&)), this, SLOT(replyLog(QString&)));
     clientList.readChannelsFromDB();
     return m_tcpServer->listen(QHostAddress::Any, nPort);
 }
@@ -86,12 +86,18 @@ void ChatServer::serverGotNewMessage()
             }
         default:
             {
-                qDebug() << "Server received unknown-typed message";
-                return;
+                qDebug() << "Server received unknown-typed message" << msgType;
+                /*m_nextBlockSize = 0;
+                return;*/
             }
         }
+        m_nextBlockSize = 0;
     }
-    m_nextBlockSize = 0;
+}
+
+void ChatServer::replyLog(QString &str)
+{
+    emit logMessage(str);
 }
 
 void ChatServer::processMessage(ChannelMessage *msg)
@@ -149,6 +155,14 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
         }
     }
     sendMessageToClient(msg->username, answer);
+    if (answer->authorizationResult)
+    {
+        ChannelListMessage *channelsMsg = new ChannelListMessage();
+        channelsMsg->channelList = clientList.getChannelsForClient(msg->username);
+        channelsMsg->listType = ChannelListMessage::listOfJoined;
+        sendMessageToClient(msg->username, channelsMsg);
+        delete channelsMsg;
+    }
     delete answer;
 }
 
@@ -207,6 +221,9 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
         }
     }
     sendMessageToClient(socket, answer);
+    //
+    qDebug() << msg->username << ((answer->registrationResult) ? " was registered." : "wasn't registered");
+    //
     delete answer;
 }
 
@@ -225,6 +242,7 @@ void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
     msgBody->pack(output);
     delete header;
 
+    output.device()->seek(0);
     output << quint16(arrBlock.size() - sizeof(quint16));
     socket->write(arrBlock);
 }
@@ -245,6 +263,7 @@ void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBod
     msgBody->pack(output);
     delete header;
 
+    output.device()->seek(0);
     output << quint16(arrBlock.size() - sizeof(quint16));
     socket->write(arrBlock);
 }

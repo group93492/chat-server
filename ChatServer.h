@@ -35,6 +35,7 @@ signals:
 private slots:
     void serverGotNewConnection();
     void serverGotNewMessage();
+    void replyLog(QString &str);
 public slots:
 };
 
