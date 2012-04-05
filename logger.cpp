@@ -51,6 +51,8 @@ void Logger::AddToChannelLog(QString &ChannelName, QString &Message)
                 emit logMessage(msg);
                 return;
             }
+            QStringList List(file->fileName());
+            emit addToListOfLogs(List);
         }
         m_ListOfLogs.insert(ChannelName, file);
     }
@@ -88,6 +90,8 @@ void Logger::AddToServerLog(ErrorStatus Status, QString &Message)
                 emit logMessage(msg);
                 return;
             }
+            QStringList List(file->fileName());
+            emit addToListOfLogs(List);
         }
         m_ListOfLogs.insert("server", file);
     }
