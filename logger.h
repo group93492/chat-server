@@ -9,6 +9,7 @@
 #include <QTime>
 #include <QDate>
 #include <QDebug>
+#include "configmanager.h"
 
 enum ErrorStatus{
     esNotify = 0,
@@ -36,7 +37,7 @@ signals:
     void logMessage(QString &msg);
     void addToListOfLogs(QStringList list);
 public slots:
-    void SetSettings(QString path);
+    void SetSettings(LoggerConfig *p_LoggerConfig);
     void StartLogger();
     void AddToChannelLog(QString &name, QString &message);
     void AddToServerLog(ErrorStatus, QString &message);

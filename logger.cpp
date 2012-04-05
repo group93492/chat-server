@@ -5,6 +5,7 @@ Logger::Logger(QObject *parent) :
     QObject(parent)
 {
     m_Dir = new QDir();
+    m_Dir->setPath(QDir::currentPath());
     arrayOfES[0] = "Notify";
     arrayOfES[1] = "Minor";
     arrayOfES[2] = "Warning";
@@ -109,9 +110,9 @@ void Logger::currentLog(QString str)
     m_currentLog = str;
 }
 
-void Logger::SetSettings(QString path)
+void Logger::SetSettings(LoggerConfig *p_LoggerConfig)
 {
-    m_Path = path;
+    m_Path = p_LoggerConfig->Path;
 }
 
 void Logger::StartLogger()

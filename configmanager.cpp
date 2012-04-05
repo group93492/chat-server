@@ -4,6 +4,7 @@ ConfigManager::ConfigManager(QObject *parent) :
     QObject(parent)
 {
     p_ChatServerConfig = new ChatServerConfig;
+    p_LoggerConfig = new LoggerConfig;
 }
 
 ConfigManager::~ConfigManager()
@@ -13,15 +14,18 @@ ConfigManager::~ConfigManager()
 
 void ConfigManager::ReadConfig()
 {
-    p_ChatServerConfig->port = ServerSettings.value("/tcpserver/port", 33033).toUInt();
+    p_ChatServerConfig->port = m_ServerSettings.value("/tcpserver/port", 33033).toUInt();
+    p_LoggerConfig->Path = m_ServerSettings.value("/logger/Path", "Logs").toString();
 }
 
 void ConfigManager::sendSignals()
 {
-    emit ChatServerSignal(p_ChatServerConfig);
+    emit configChatServerSignal(p_ChatServerConfig);
+    emit configLoggerSignal(p_LoggerConfig);
 }
 
 void ConfigManager::WriteConfig()
 {
-    ServerSettings.setValue("/tcpserver/port", p_ChatServerConfig->port);
+    m_ServerSettings.setValue("/tcpserver/port", p_ChatServerConfig->port);
+    m_ServerSettings.setValue("/logger/Path", p_LoggerConfig->Path);
 }

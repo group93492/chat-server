@@ -2,6 +2,7 @@
 #define STATSWINDOW_H
 
 #include <QMainWindow>
+#include <QFileDialog>
 #include "ChatServer.h"
 #include "configmanager.h"
 #include "logger.h"
@@ -32,6 +33,7 @@ private slots:
     void addToComboBox(QStringList List);
     void on_logsBox_currentIndexChanged(const QString &arg1);
     void on_dateEdit_dateChanged(const QDate &date);
+    void on_toolButton_clicked();
 };
 
 #endif // STATSWINDOW_H

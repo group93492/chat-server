@@ -101,6 +101,45 @@
        <string>Сохранить настройки</string>
       </property>
      </widget>
+     <widget class="QLabel" name="logsDirLabel">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>60</y>
+        <width>111</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Папка с логами</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="logPathEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>80</y>
+        <width>431</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QToolButton" name="toolButton">
+      <property name="geometry">
+       <rect>
+        <x>440</x>
+        <y>80</y>
+        <width>26</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="arrowType">
+       <enum>Qt::NoArrow</enum>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="messagesTab">
      <attribute name="title">
@@ -142,7 +181,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="showLogLabel">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -155,7 +194,7 @@
        <string>Показать лог:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="showDateLabel">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -168,7 +207,7 @@
        <string>За дату:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="showTimeLabel">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -214,7 +253,7 @@
        <string>—</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_5">
+     <widget class="QLabel" name="showEventLabel">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -227,7 +266,7 @@
        <string>Показать события:</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox">
+     <widget class="QCheckBox" name="notifycheckBox">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -243,7 +282,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_2">
+     <widget class="QCheckBox" name="minorcheckBox_2">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -259,7 +298,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_3">
+     <widget class="QCheckBox" name="warningcheckBox_3">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -275,7 +314,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_4">
+     <widget class="QCheckBox" name="criticalcheckBox_4">
       <property name="geometry">
        <rect>
         <x>350</x>
@@ -291,7 +330,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_5">
+     <widget class="QCheckBox" name="fatalcheckBox_5">
       <property name="geometry">
        <rect>
         <x>350</x>

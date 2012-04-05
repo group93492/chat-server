@@ -11,16 +11,18 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_server = new ChatServer(this);
     m_logs = new Logger(this);
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
-    connect(m_settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
+    connect(m_settings, SIGNAL(configChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
+    connect(m_settings, SIGNAL(configLoggerSignal(LoggerConfig*)), m_logs, SLOT(SetSettings(LoggerConfig*)));
     connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
     connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
     connect(m_logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
     connect(m_logs, SIGNAL(addToListOfLogs(QStringList)), this, SLOT(addToComboBox(QStringList)));
     connect(ui->logsBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
-    m_logs->SetSettings("Logs"); //temporary
-    m_logs->StartLogger();
     m_settings->ReadConfig();
+    m_settings->sendSignals();
+    m_logs->StartLogger();
     ui->portEdit->setText(QString::number(m_settings->p_ChatServerConfig->port));
+    ui->logPathEdit->setText(m_settings->p_LoggerConfig->Path);
 }
 
 StatsWindow::~StatsWindow()
@@ -33,7 +35,7 @@ StatsWindow::~StatsWindow()
 
 void StatsWindow::startServer()
 {
-    m_settings->sendSignals();
+
     QString msg;
     if (m_server->startServer())
     {
@@ -72,11 +74,24 @@ void StatsWindow::addToComboBox(QStringList List)
 
 void StatsWindow::on_logsBox_currentIndexChanged(const QString &arg1)
 {
-    QFile file(arg1);
-    file.open(QIODevice::ReadOnly);
-    QTextStream in(&file);
-    ui->logBrowser->clear();
-    ui->logBrowser->append(in.readAll());
+    QDir Dir;
+    Dir.setCurrent(QDir::currentPath());
+    Dir.makeAbsolute();
+    Dir.cdUp();
+    if(Dir.cd(ui->dateEdit->date().toString("dd.MM.yyyy")))
+    {
+        QFile file(QString(Dir.path() + "/" + arg1));
+        file.open(QIODevice::ReadOnly);
+        QTextStream in(&file);
+        ui->logBrowser->clear();
+        ui->logBrowser->append(in.readAll());
+        file.close();
+    }
+    else
+    {
+        ui->logBrowser->clear();
+        ui->logsBox->clear();
+    }
 }
 
 void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
@@ -92,12 +107,21 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
         ui->logsBox->clear();
         ui->logsBox->addItems(List);
         QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
-        qDebug() << Dir.path();
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
         ui->logBrowser->clear();
         ui->logBrowser->append(in.readAll());
+        file.close();
     }
     else
+    {
         ui->logBrowser->clear();
+        ui->logsBox->clear();
+    }
+}
+
+void StatsWindow::on_toolButton_clicked()
+{
+    ui->logPathEdit->setText(QFileDialog::getExistingDirectory());
+    m_settings->p_LoggerConfig->Path = ui->logPathEdit->text();
 }
