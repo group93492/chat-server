@@ -33,6 +33,14 @@ StatsWindow::~StatsWindow()
     delete m_logs;
 }
 
+bool StatsWindow::errorFilter(QVector<QString> vector, QString str)
+{
+    for(int i = 0; i < vector.size(); i++)
+        if(str.contains(vector[i]))
+            return true;
+    return false;
+}
+
 void StatsWindow::startServer()
 {
 
@@ -124,4 +132,42 @@ void StatsWindow::on_toolButton_clicked()
 {
     ui->logPathEdit->setText(QFileDialog::getExistingDirectory());
     m_settings->p_LoggerConfig->Path = ui->logPathEdit->text();
+}
+
+void StatsWindow::on_pushButton_clicked()
+{
+    ui->logBrowser->clear();
+    QVector<QString> errorRules;
+    if(ui->notifycheckBox->checkState())
+        errorRules.append("[Notify]");
+    if(ui->minorcheckBox->checkState())
+        errorRules.append("[Minor]");
+    if(ui->warningcheckBox->checkState())
+        errorRules.append("[Warning]");
+    if(ui->criticalcheckBox->checkState())
+        errorRules.append("[Critical]");
+    if(ui->fatalcheckBox->checkState())
+        errorRules.append("[Fatal]");
+    QDir Dir;
+    Dir.setCurrent(QDir::currentPath());
+    Dir.makeAbsolute();
+    Dir.cdUp();
+    if(Dir.cd(ui->dateEdit->date().toString("dd.MM.yyyy")))
+    {
+        QString str;
+        QString time;
+        QString lefttime = ui->timeEdit->time().toString("[hh:mm:ss]");
+        QString righttime = ui->timeEdit_2->time().toString("[hh:mm:ss]");
+        QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        file.open(QIODevice::ReadOnly);
+        QTextStream in(&file);
+        while(!(in.atEnd()))
+        {
+            str = in.readLine();
+            time = str.left(10);
+            if(time >= lefttime && time <= righttime && errorFilter(errorRules, str))
+                ui->logBrowser->append(str);
+        }
+        file.close();
+    }
 }

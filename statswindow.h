@@ -24,7 +24,7 @@ private:
     ChatServer *m_server;
     ConfigManager *m_settings;
     Logger *m_logs;
-
+    bool errorFilter(QVector<QString> vector, QString str);
 private slots:
     void startServer();
     void logServerMessage(QString &message);
@@ -34,6 +34,7 @@ private slots:
     void on_logsBox_currentIndexChanged(const QString &arg1);
     void on_dateEdit_dateChanged(const QDate &date);
     void on_toolButton_clicked();
+    void on_pushButton_clicked();
 };
 
 #endif // STATSWINDOW_H
