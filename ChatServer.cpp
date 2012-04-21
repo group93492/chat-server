@@ -11,6 +11,7 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
 //initialize client list
 {
     m_tcpServer = new QTcpServer(this);
+    m_port = nPort;
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
     //create client list, load this bastard from db
     //clientList = GeneralClientList;
@@ -103,7 +104,12 @@ void ChatServer::serverGotNewMessage()
 
 void ChatServer::replyLog(QString &str)
 {
-    emit logMessage(str);
+    emit serverLog(esNotify, str);
+}
+
+void ChatServer::setConfig(ChatServerConfig *pointer)
+{
+    m_port = pointer->port;
 }
 
 void ChatServer::processMessage(ChannelMessage *msg)
@@ -122,7 +128,7 @@ void ChatServer::processMessage(ChannelMessage *msg)
             .arg(msg->sender)
             .arg(msg->receiver)
             .arg(msg->messageText);
-    emit logMessage(messageText);
+    emit serverLog(esNotify, messageText);
     //and reply to all of receiver channel users a channel message
     sendMessageToChannel(msg->receiver, msg);
 }
@@ -190,7 +196,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     }
     qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " was disconnected from server";
-    emit logMessage(messageText);
+    emit serverLog(esNotify, messageText);
     QStringList channels = m_clientList.getChannelsForClient(msg->sender);
     for (int i = 0; i < channels.count(); ++i)
         sendMessageToChannel(channels[i], msg);

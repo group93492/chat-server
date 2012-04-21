@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "ChatServer.h"
+#include "configmanager.h"
+#include "logger.h"
 
 namespace Ui {
 class StatsWindow;
@@ -19,11 +21,18 @@ public:
 private:
     Ui::StatsWindow *ui;
     ChatServer *m_server;
+    ConfigManager *m_settings;
+    Logger *m_logs;
 
 private slots:
     void startServer();
     void logServerMessage(QString &message);
     void on_watchTableButton_clicked();
+    void on_portEdit_editingFinished();
+    void on_SettingsButton_clicked();
+    void addToComboBox(QStringList List);
+    void on_logsBox_currentIndexChanged(const QString &arg1);
+    void on_dateEdit_dateChanged(const QDate &date);
 
 signals:
     void lookTableSgnl(QTableView*, QString);
