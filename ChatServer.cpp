@@ -14,9 +14,16 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
     //create client list, load this bastard from db
     //clientList = GeneralClientList;
-    connect(&clientList, SIGNAL(logMessage(QString&)), this, SLOT(replyLog(QString&)));
-    clientList.readChannelsFromDB();
+    //connect(&m_clientList, SIGNAL(logMessage(QString&)), this, SLOT(replyLog(QString&)));
+    m_clientList.readChannelsFromDB();
     return m_tcpServer->listen(QHostAddress::Any, nPort);
+}
+
+void ChatServer::stopServer()
+//stops server
+//we need to send disconnect messages to all channels
+{
+
 }
 
 void ChatServer::serverGotNewConnection()
@@ -133,7 +140,7 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
     }
     qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     AuthorizationAnswer *answer = new AuthorizationAnswer();
-    switch (clientList.authorize(msg->username, msg->password, socket))
+    switch (m_clientList.authorize(msg->username, msg->password, socket))
     {
     case GeneralClientList::arAllreadyAuthorized:
         {
@@ -157,7 +164,7 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
     {
         sendMessageToClient(msg->username, answer);
         ChannelListMessage *channelsMsg = new ChannelListMessage();
-        channelsMsg->channelList = clientList.getChannelsForClient(msg->username);
+        channelsMsg->channelList = m_clientList.getChannelsForClient(msg->username);
         channelsMsg->listType = ChannelListMessage::listOfJoined;
         sendMessageToClient(msg->username, channelsMsg);
         delete channelsMsg;
@@ -184,7 +191,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " was disconnected from server";
     emit logMessage(messageText);
-    QStringList channels = clientList.getChannelsForClient(msg->sender);
+    QStringList channels = m_clientList.getChannelsForClient(msg->sender);
     for (int i = 0; i < channels.count(); ++i)
         sendMessageToChannel(channels[i], msg);
 }
@@ -201,7 +208,7 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
     }
     qDebug() << "Server processing registration request:" << msg->username << msg->password;
     RegistrationAnswer *answer = new RegistrationAnswer();
-    switch (clientList.registrate(msg->username, msg->password))
+    switch (m_clientList.registrate(msg->username, msg->password))
     {
     case GeneralClientList::rrOccupiedUsername:
         {
@@ -231,7 +238,7 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
 //packing and sending allready formed message to authorized client
 {
-    QTcpSocket *socket = clientList.getClient(username).userSocket();
+    QTcpSocket *socket = m_clientList.getClient(username).userSocket();
     QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
     output.setVersion(QDataStream::Qt_4_7);
@@ -273,7 +280,7 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
 //send message *msgBody to all clients, which are in channel <channelName>
 //needed for replying channel and other messages for all channel
 {
-    if (!clientList.hasChannel(channelName))
+    if (!m_clientList.hasChannel(channelName))
         return;
     /*QByteArray arrBlock;
     QDataStream output(&arrBlock, QIODevice::WriteOnly);
@@ -285,7 +292,7 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
     delete header;
     output << quint16(arrBlock.size() - sizeof(quint16));*/
 
-    ChatChannel channel = clientList.getChannel(channelName);
+    ChatChannel channel = m_clientList.getChannel(channelName);
     for (int i = 0; i < channel.userList.count(); i++)
     {
         sendMessageToClient(channel.userList[i], msgBody);

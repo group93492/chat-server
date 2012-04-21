@@ -13,8 +13,7 @@ class ChatServer : public QObject
 private:
     QTcpServer *m_tcpServer;
     quint16 m_nextBlockSize;
-    QMap<QString, QTcpSocket *> m_clientList;
-    GeneralClientList clientList;
+    GeneralClientList m_clientList;
 
     void processMessage(ChannelMessage *msg);
     void processMessage(AuthorizationRequest *msg, QTcpSocket *socket);
@@ -28,7 +27,7 @@ public:
     enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
     bool startServer(const quint16 nPort);
-    DBManager *DataBase;
+    void stopServer();
 signals:
     void logMessage(QString &msg);
 
