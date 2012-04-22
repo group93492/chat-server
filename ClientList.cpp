@@ -129,8 +129,6 @@ void DBManager::connectToDB()
 
 void DBManager::disconnectDB()
 {
-    /*if (tableView)
-        tableView->close();*/
     m_DB.close();
 }
 
@@ -166,16 +164,6 @@ bool DBManager::createMembershipTable()
             ");";
     return query.exec(str);
 }
-
-/*void DBManager::lookTable(QTableView *widget, QString tablename)
-{
-    tableView = widget;
-    QSqlTableModel *model = new QSqlTableModel;
-    model->setTable(tablename);
-    model->select();
-    model->setEditStrategy(QSqlTableModel::OnFieldChange);
-    tableView->setModel(model);
-}*/
 
 void DBManager::createDB()
 {

@@ -100,8 +100,6 @@ public:
     QVector<ChatChannel> getChannelList();
 signals:
     void logMessage(QString&);
-public slots:
-   /*void lookTable(QTableView *, QString tablename);*/
 };
 
 class GeneralClientList: public QObject

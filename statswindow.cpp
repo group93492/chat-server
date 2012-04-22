@@ -10,6 +10,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_settings = new ConfigManager;
     m_server = new ChatServer(this);
     m_logs = new Logger(this);
+    m_tableModel = new QSqlTableModel;
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
     connect(m_settings, SIGNAL(ChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
     connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
@@ -17,10 +18,15 @@ StatsWindow::StatsWindow(QWidget *parent) :
     connect(m_logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
     connect(m_logs, SIGNAL(addToListOfLogs(QStringList)), this, SLOT(addToComboBox(QStringList)));
     connect(ui->logsBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
+    connect(ui->tableComboBox, SIGNAL(currentIndexChanged(QString)), this , SLOT(showTable(QString)));
     m_logs->SetSettings("Logs"); //temporary
     m_logs->StartLogger();
     m_settings->ReadConfig();
     ui->portEdit->setText(QString::number(m_settings->p_ChatServerConfig->port));
+
+    ui->tableComboBox->addItem("clients");
+    ui->tableComboBox->addItem("channels");
+    ui->tableComboBox->addItem("membership");
 }
 
 StatsWindow::~StatsWindow()
@@ -29,6 +35,7 @@ StatsWindow::~StatsWindow()
     delete m_server;
     delete m_settings;
     delete m_logs;
+    delete m_tableModel;
 }
 
 void StatsWindow::startServer()
@@ -106,7 +113,10 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
         ui->logBrowser->clear();
 }
 
-void StatsWindow::on_watchTableButton_clicked()
+void StatsWindow::showTable(QString tableName)
 {
-    /*emit lookTableSgnl(ui->tableView, ui->lineEdit->text());*/
+    m_tableModel->setTable(tableName);
+    m_tableModel->select();
+    m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
+    ui->tableView->setModel(m_tableModel);
 }
