@@ -265,3 +265,32 @@ bool ChannelInfoMessage::unpack(QDataStream &stream)
     stream >> channelMembers;
     return true;
 }
+
+bool ChannelListRequest::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << quint8(listType) << nick;
+    return true;
+}
+
+bool ChannelListRequest::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    quint8 tempType;
+    stream >> tempType >> nick;
+    listType = (ChannelListRequest::ListType) tempType;
+    return true;
+}
+
+ChannelListRequest::ChannelListRequest()
+{
+    messageType = cmtChannelListRequest;
+}
+
+ChannelListRequest::ChannelListRequest(QDataStream &stream)
+{
+    messageType = cmtChannelListRequest;
+    unpack(stream);
+}

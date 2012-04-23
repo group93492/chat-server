@@ -21,6 +21,7 @@ private:
     void processMessage(AuthorizationRequest *msg, QTcpSocket *socket);
     void processMessage(DisconnectMessage *msg);
     void processMessage(RegistrationRequest *msg, QTcpSocket *socket);
+    void processMessage(ChannelListRequest *msg, QTcpSocket *socket);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);
     void sendMessageToClient(QString username, ChatMessageBody *msgBody);
     void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);

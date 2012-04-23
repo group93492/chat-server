@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include <QString>
 #include <QStringList>
+#include <QMap>
 
 enum ChatMessageType
 {
@@ -15,10 +16,17 @@ enum ChatMessageType
     cmtRegistrationRequest,
     cmtRegistrationAnswer,
     cmtChannelListMessage,
-    cmtChannelInfo/*,
+    cmtChannelInfo,
+    cmtChannelListRequest/*,
     cmtChannelJoinRequest,
     cmtChannelJoinResult*/
     /*etc*/
+};
+
+struct ChannelInf
+{
+    QString name;
+    QString descr;
 };
 
 class ChatMessageBody
@@ -120,7 +128,7 @@ public:
     ChannelListMessage();
     ChannelListMessage(QDataStream &stream);
     ListType listType;
-    QStringList channelList;
+    QMap<QString, QString> channelList;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };
@@ -135,6 +143,22 @@ public:
     QString channelDescription;
     QString channelTopic;
     QStringList channelMembers;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelListRequest : public ChatMessageBody
+{
+public:
+    enum ListType
+    {
+        listOfJoined,
+        listOfAll
+    };
+    ChannelListRequest();
+    ChannelListRequest(QDataStream &stream);
+    ListType listType;
+    QString nick;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

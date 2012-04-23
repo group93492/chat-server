@@ -388,12 +388,20 @@ bool GeneralClientList::hasClient(QString username)
     return m_generalClientList.contains(username);
 }
 
-QStringList GeneralClientList::getChannelsForClient(QString username)
+QMap<QString, QString> GeneralClientList::getChannelsForClient(QString username)
 {
-    QStringList channels;
+    QMap<QString, QString> channels;
     for (int i = 0; i < m_channelList.count(); ++i)
         if (m_DB.isMembership(username, m_channelList[i].name()))
-            channels.append(m_channelList[i].name());
+            channels.insert(m_channelList[i].name(), m_channelList[i].description());
+    return channels;
+}
+
+QMap<QString, QString> GeneralClientList::getAllChanells()
+{
+    QMap<QString, QString> channels;
+    for (int i = 0; i < m_channelList.count(); ++i)
+        channels.insert(m_channelList[i].name(), m_channelList[i].description());
     return channels;
 }
 

@@ -128,8 +128,8 @@ public:
     bool hasChannel(QString channelName);
     ChatClient getClient(const QString &username);
     bool hasClient(QString username);
-    QStringList getChannelsForClient(QString username);
-
+    QMap<QString, QString> getChannelsForClient(QString username);
+    QMap<QString, QString> getAllChanells();
     RegResult registrate(QString username, QString password);
     AuthResult authorize(QString username, QString password, QTcpSocket *socket);
     void disconnect(QString username);

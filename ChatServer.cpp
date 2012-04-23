@@ -92,6 +92,13 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtChannelListRequest:
+            {
+                ChannelListRequest *msg = new ChannelListRequest(input);
+                processMessage(msg, pClientSocket);
+                delete msg;
+                break;
+            }
         default:
             {
                 qDebug() << "Server received unknown-typed message" << msgType;
@@ -197,7 +204,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " was disconnected from server";
     emit serverLog(esNotify, messageText);
-    QStringList channels = m_clientList.getChannelsForClient(msg->sender);
+    QStringList channels = m_clientList.getChannelsForClient(msg->sender).keys();
     for (int i = 0; i < channels.count(); ++i)
         sendMessageToChannel(channels[i], msg);
 }
@@ -239,6 +246,27 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
     qDebug() << msg->username << ((answer->registrationResult) ? " was registered." : "wasn't registered");
     //
     delete answer;
+}
+
+void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
+{
+    if (!msg)
+    {
+        qDebug() << "Error processing authprization request- message is empty";
+        return;
+    }
+    ChannelListMessage *list = new ChannelListMessage();
+    if(msg->listType == ChannelListRequest::listOfAll)
+    {
+        list->listType = ChannelListMessage::listOfAll;
+        list->channelList = m_clientList.getAllChanells();
+    }
+    else
+    {
+        list->listType = ChannelListMessage::listOfJoined;
+        list->channelList = m_clientList.getChannelsForClient(msg->nick);
+    }
+    sendMessageToClient(socket, list);
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
