@@ -110,19 +110,30 @@ void DBManager::connectToDB()
     {
         m_DB.setDatabaseName(m_DBFileName);
         if(!m_DB.open())
+        {
             msg = m_DB.lastError().text();
+            emit logMessage(esFatal, msg);
+        }
         else
+        {
             msg = "DataBase opened.";
-        emit logMessage(msg);
+            emit logMessage(esNotify, msg);
+        }
+
     }
     else
     {
         m_DB.setDatabaseName(m_DBFileName);
         if(!m_DB.open())
+        {
             msg = m_DB.lastError().text();
+            emit logMessage(esFatal, msg);
+        }
         else
+        {
             msg = "DataBase not found, creating new DataBase";
-        emit logMessage(msg);
+            emit logMessage(esNotify, msg);
+        }
         createDB();
     }
 }
@@ -172,10 +183,15 @@ void DBManager::createDB()
     if (!createClientsTable() ||
         !createChannelsTable() ||
         !createMembershipTable())
+    {
         msg = "Error creating tables";
+        emit logMessage(esFatal, msg);
+    }
     else
+    {
         msg = "Tables 'clients', 'channels', 'membership' created succesfully";
-    emit logMessage(msg);
+        emit logMessage(esNotify, msg);
+    }
     ChatChannel channel;
     channel.setName("main");
     channel.setDescription("Main channel, contains all users");
@@ -193,7 +209,7 @@ bool DBManager::hasClient(QString username)
     {
         QString msg("SQL query error in getting client: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
     else
         return query.next();
@@ -211,7 +227,7 @@ ChatClient DBManager::getClient(QString username)
     {   
         QString msg("SQL query error in getting client: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
     else
     {
@@ -239,7 +255,7 @@ void DBManager::setClient(ChatClient &client)
     {
         QString msg("SQL query error in setting client: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
 }
 
@@ -253,7 +269,7 @@ bool DBManager::hasChannel(QString channelName)
     {
         QString msg("SQL query error in getting channel: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
         return false;
     }
     else
@@ -271,7 +287,7 @@ ChatChannel DBManager::getChannel(QString channelName)
     {
         QString msg("SQL query error in getting channel: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
     else
     {
@@ -297,7 +313,7 @@ void DBManager::setChannel(ChatChannel &channel)
     {
         QString msg("SQL query error in setting channel: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
 }
 
@@ -312,7 +328,7 @@ bool DBManager::isMembership(QString username, QString channelName)
     {
         QString msg("SQL query error in getting membership: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
         return false;
     }
     else
@@ -331,7 +347,7 @@ void DBManager::addMembership(QString username, QString channelName)
     {
         QString msg("SQL query error in adding membership: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
     }
 }
 
@@ -346,7 +362,7 @@ QVector<ChatChannel> DBManager::getChannelList()
     {
         QString msg("SQL query error in getting channel list: %1");
         msg.arg(query.lastError().text());
-        emit logMessage(msg);
+        emit logMessage(esWarning, msg);
 //        return channels;
     }
     do
@@ -427,7 +443,7 @@ GeneralClientList::RegResult GeneralClientList::registrate(QString username, QSt
 GeneralClientList::GeneralClientList(QObject *parent): QObject(parent)
 {
     //readChannelsFromDB();
-    connect(&m_DB, SIGNAL(logMessage(QString &)), this, SLOT(replyLog(QString&)));
+    connect(&m_DB, SIGNAL(logMessage(ErrorStatus, QString &)), this, SLOT(replyLog(ErrorStatus, QString&)));
 }
 
 GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QString password, QTcpSocket *socket)
@@ -490,9 +506,9 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
 
 }
 
-void GeneralClientList::replyLog(QString &param)
+void GeneralClientList::replyLog(ErrorStatus status, QString &param)
 {
-    emit logMessage(param);
+    emit logMessage(status, param);
 }
 
 void GeneralClientList::readChannelsFromDB()

@@ -34,7 +34,8 @@ void ChatServer::serverGotNewConnection()
 {
     QTcpSocket *newSocket = m_tcpServer->nextPendingConnection();
     connect(newSocket, SIGNAL(readyRead()), this, SLOT(serverGotNewMessage()));
-    qDebug() << "Server got new connection from" << newSocket->peerAddress().toString() << newSocket->peerPort();
+    QString log = "Server got new connection from" + newSocket->peerAddress().toString() + QString::number(newSocket->peerPort());
+    emit serverLog(esNotify, log);
 }
 
 void ChatServer::serverGotNewMessage()
@@ -44,7 +45,6 @@ void ChatServer::serverGotNewMessage()
 //then we read body of the message and call method
 //that could process message its[message body] type
 {
-    qDebug() << "Server received new message";
     QTcpSocket *pClientSocket = (QTcpSocket*)sender();
     QDataStream input(pClientSocket);
     input.setVersion(QDataStream::Qt_4_7);
@@ -101,7 +101,8 @@ void ChatServer::serverGotNewMessage()
             }
         default:
             {
-                qDebug() << "Server received unknown-typed message" << msgType;
+                QString log = "Server received unknown-typed message" + msgType;
+                emit serverLog(esWarning, log);
                 break;
             }
         }
@@ -127,15 +128,14 @@ void ChatServer::processMessage(ChannelMessage *msg)
     //need to reply it to all authorized clients in that channel
     if (!msg)
     {
-        qDebug() << "Error processing channel message - message is empty";
+        QString log = "Error processing channel message - message is empty";
+        emit serverLog(esMinor, log);
         return;
     }
-    qDebug() << "Server processing channel message:" << msg->sender << msg->receiver << msg->messageText;
-    QString messageText = QString("Received channel message. Sender: %1. Receiver: %2. Body: %3")
+    QString messageText = QString("%1: %2")
             .arg(msg->sender)
-            .arg(msg->receiver)
             .arg(msg->messageText);
-    emit serverLog(esNotify, messageText);
+    emit channelLog(msg->receiver, messageText);
     //and reply to all of receiver channel users a channel message
     sendMessageToChannel(msg->receiver, msg);
 }
@@ -148,10 +148,10 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
 {
     if (!msg)
     {
-        qDebug() << "Error processing authprization request- message is empty";
+        QString log = "Error processing authprization request- message is empty";
+        emit serverLog(esMinor, log);
         return;
     }
-    qDebug() << "Server processing authorization request: " << msg->username << msg->password;
     AuthorizationAnswer *answer = new AuthorizationAnswer();
     switch (m_clientList.authorize(msg->username, msg->password, socket))
     {
@@ -198,10 +198,10 @@ void ChatServer::processMessage(DisconnectMessage *msg)
 {
     if (!msg)
     {
-        qDebug() << "Error processing disconnect message - message is empty";
+        QString log = "Error processing disconnect message - message is empty";
+        emit serverLog(esMinor, log);
         return;
     }
-    qDebug() << "Server processing disconnect message from:" << msg->sender;
     QString messageText = msg->sender + " was disconnected from server";
     emit serverLog(esNotify, messageText);
     QStringList channels = m_clientList.getChannelsForClient(msg->sender).keys();
@@ -216,10 +216,10 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
 {
     if (!msg)
     {
-        qDebug() << "Error processing registration request - message is empty";
+        QString log = "Error processing registration request - message is empty";
+        emit serverLog(esMinor, log);
         return;
     }
-    qDebug() << "Server processing registration request:" << msg->username << msg->password;
     RegistrationAnswer *answer = new RegistrationAnswer();
     switch (m_clientList.registrate(msg->username, msg->password))
     {
@@ -243,7 +243,8 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
     }
     sendMessageToClient(socket, answer);
     //
-    qDebug() << msg->username << ((answer->registrationResult) ? " was registered." : "wasn't registered");
+    QString log = msg->username + ((answer->registrationResult) ? " was registered." : "wasn't registered");
+    emit serverLog(esNotify, log);
     //
     delete answer;
 }
@@ -252,7 +253,8 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
 {
     if (!msg)
     {
-        qDebug() << "Error processing authprization request- message is empty";
+        QString log = "Error processing authorization request- message is empty";
+        emit serverLog(esMinor, log);
         return;
     }
     ChannelListMessage *list = new ChannelListMessage();

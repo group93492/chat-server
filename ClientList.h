@@ -8,6 +8,7 @@
 #include <QtSql>
 #include <QTableView>
 #include "ChatMessages.h"
+#include "logger.h"
 /*
 TODO:
 classes for client, channel and channel list
@@ -99,7 +100,7 @@ public:
     // methods for initializing channels in general client list
     QVector<ChatChannel> getChannelList();
 signals:
-    void logMessage(QString&);
+    void logMessage(ErrorStatus, QString&);
 };
 
 class GeneralClientList: public QObject
@@ -136,9 +137,9 @@ public:
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
 signals:
-    void logMessage(QString &);
+    void logMessage(ErrorStatus, QString &);
 private slots:
-    void replyLog(QString &param);
+    void replyLog(ErrorStatus, QString &param);
 };
 
 #endif // CLIENTLIST_H
