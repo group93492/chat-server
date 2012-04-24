@@ -15,18 +15,14 @@ enum ChatMessageType
     cmtDisconnectMessage,
     cmtRegistrationRequest,
     cmtRegistrationAnswer,
-    cmtChannelListMessage,
     cmtChannelInfo,
-    cmtChannelListRequest/*,
+    cmtChannelListRequest,
+    cmtChannelListMessage,
     cmtChannelJoinRequest,
-    cmtChannelJoinResult*/
+    cmtChannelJoinResult,
+    cmtChannelLeaveMessage,
+    cmtChannelSystemMessage
     /*etc*/
-};
-
-struct ChannelInf
-{
-    QString name;
-    QString descr;
 };
 
 class ChatMessageBody
@@ -159,6 +155,49 @@ public:
     ChannelListRequest(QDataStream &stream);
     ListType listType;
     QString nick;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelJoinRequest : public ChatMessageBody
+{
+public:
+    ChannelJoinRequest();
+    ChannelJoinRequest(QDataStream &stream);
+    QString nick;
+    QString channelName;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelJoinResult : public ChatMessageBody
+{
+public:
+    ChannelJoinResult();
+    ChannelJoinResult(QDataStream &stream);
+    bool result;
+    QString channelName;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelLeaveMessage : public ChatMessageBody
+{
+public:
+    ChannelLeaveMessage();
+    ChannelLeaveMessage(QDataStream &stream);
+    QString nick;
+    QString channelName;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelSystemMessage : public ChatMessageBody
+{
+public:
+    ChannelSystemMessage();
+    ChannelSystemMessage(QDataStream &stream);
+    QString msg;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

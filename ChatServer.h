@@ -22,6 +22,8 @@ private:
     void processMessage(DisconnectMessage *msg);
     void processMessage(RegistrationRequest *msg, QTcpSocket *socket);
     void processMessage(ChannelListRequest *msg, QTcpSocket *socket);
+    void processMessage(ChannelJoinRequest *msg, QTcpSocket *socket);
+    void processMessage(ChannelLeaveMessage *msg);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);
     void sendMessageToClient(QString username, ChatMessageBody *msgBody);
     void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);
@@ -38,7 +40,7 @@ signals:
 private slots:
     void serverGotNewConnection();
     void serverGotNewMessage();
-    void replyLog(QString &str);
+    void replyLog(ErrorStatus status, QString &str);
 public slots:
     void setConfig(ChatServerConfig *pointer);
 };

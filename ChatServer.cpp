@@ -15,7 +15,7 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
     connect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
     //create client list, load this bastard from db
     //clientList = GeneralClientList;
-    //connect(&m_clientList, SIGNAL(logMessage(QString&)), this, SLOT(replyLog(QString&)));
+    connect(&m_clientList, SIGNAL(logMessage(ErrorStatus, QString&)), this, SLOT(replyLog(ErrorStatus, QString&)));
     m_clientList.readChannelsFromDB();
     return m_tcpServer->listen(QHostAddress::Any, nPort);
 }
@@ -34,7 +34,7 @@ void ChatServer::serverGotNewConnection()
 {
     QTcpSocket *newSocket = m_tcpServer->nextPendingConnection();
     connect(newSocket, SIGNAL(readyRead()), this, SLOT(serverGotNewMessage()));
-    QString log = "Server got new connection from" + newSocket->peerAddress().toString() + QString::number(newSocket->peerPort());
+    QString log = "Server got new connection from " + newSocket->peerAddress().toString() + ":" + QString::number(newSocket->peerPort());
     emit serverLog(esNotify, log);
 }
 
@@ -99,6 +99,20 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtChannelJoinRequest:
+            {
+                ChannelJoinRequest *msg = new ChannelJoinRequest(input);
+                processMessage(msg, pClientSocket);
+                delete msg;
+                break;
+            }
+        case cmtChannelLeaveMessage:
+            {
+                ChannelLeaveMessage *msg = new ChannelLeaveMessage(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
         default:
             {
                 QString log = "Server received unknown-typed message" + msgType;
@@ -110,9 +124,9 @@ void ChatServer::serverGotNewMessage()
     }
 }
 
-void ChatServer::replyLog(QString &str)
+void ChatServer::replyLog(ErrorStatus status, QString &str)
 {
-    emit serverLog(esNotify, str);
+    emit serverLog(status, str);
 }
 
 void ChatServer::setConfig(ChatServerConfig *pointer)
@@ -269,6 +283,43 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         list->channelList = m_clientList.getChannelsForClient(msg->nick);
     }
     sendMessageToClient(socket, list);
+    delete msg;
+    delete list;
+}
+
+void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
+{
+    ChannelJoinResult *answer = new ChannelJoinResult();
+    if(m_clientList.hasChannel(msg->channelName) && !m_clientList.getChannel(msg->channelName).hasClient(msg->nick))
+    {
+        m_clientList.joinChannel(msg->nick, msg->channelName);
+        answer->result = true;
+        ChannelSystemMessage *newmsg = new ChannelSystemMessage();
+        newmsg->msg = msg->nick + " join to channel";
+        sendMessageToChannel(msg->channelName, newmsg);
+        delete newmsg;
+    }
+    else
+    {
+        answer->result = false;
+    }
+    answer->channelName = msg->channelName;
+    sendMessageToClient(socket, answer);
+    delete answer;
+    delete msg;
+}
+
+void ChatServer::processMessage(ChannelLeaveMessage *msg)
+{
+    if(m_clientList.getChannel(msg->channelName).hasClient(msg->nick))
+    {
+        m_clientList.leaveChannel(msg->nick, msg->channelName);
+        ChannelSystemMessage *newmsg = new ChannelSystemMessage();
+        newmsg->msg = msg->nick + " leave from channel";
+        sendMessageToChannel(msg->channelName, newmsg);
+        delete newmsg;
+    }
+    delete msg;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
