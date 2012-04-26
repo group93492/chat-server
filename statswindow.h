@@ -24,6 +24,7 @@ private:
     ChatServer *m_server;
     ConfigManager *m_settings;
     Logger *m_logs;
+    QSqlTableModel *m_tableModel;
     bool errorFilter(QVector<QString> vector, QString str);
 private slots:
     void startServer();
@@ -35,6 +36,7 @@ private slots:
     void on_dateEdit_dateChanged(const QDate &date);
     void on_toolButton_clicked();
     void on_pushButton_clicked();
+	void showTable(QString tableName);
 };
 
 #endif // STATSWINDOW_H

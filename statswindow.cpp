@@ -10,6 +10,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_settings = new ConfigManager;
     m_server = new ChatServer(this);
     m_logs = new Logger(this);
+    m_tableModel = new QSqlTableModel;
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
     connect(m_settings, SIGNAL(configChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
     connect(m_settings, SIGNAL(configLoggerSignal(LoggerConfig*)), m_logs, SLOT(SetSettings(LoggerConfig*)));
@@ -23,6 +24,9 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_logs->StartLogger();
     ui->portEdit->setText(QString::number(m_settings->p_ChatServerConfig->port));
     ui->logPathEdit->setText(m_settings->p_LoggerConfig->Path);
+    ui->tableComboBox->addItem("clients");
+    ui->tableComboBox->addItem("channels");
+    ui->tableComboBox->addItem("membership");
 }
 
 StatsWindow::~StatsWindow()
@@ -31,6 +35,7 @@ StatsWindow::~StatsWindow()
     delete m_server;
     delete m_settings;
     delete m_logs;
+    delete m_tableModel;
 }
 
 bool StatsWindow::errorFilter(QVector<QString> vector, QString str)
@@ -43,14 +48,20 @@ bool StatsWindow::errorFilter(QVector<QString> vector, QString str)
 
 void StatsWindow::startServer()
 {
-
+    quint16 port = ui->portEdit->text().toUInt();
+    m_settings->sendSignals();
     QString msg;
-    if (m_server->startServer())
+    if (m_server->startServer(port))
     {
         ui->startButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")
                                .arg(m_settings->p_ChatServerConfig->port);
         m_logs->AddToServerLog(esNotify, msg);
+        connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
+        connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
+        /*connect(m_server->DataBase, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
+        connect(this, SIGNAL(lookTableSgnl(QTableView*, QString)), m_server->DataBase, SLOT(lookTable(QTableView*, QString)));
+        m_server->DataBase->connectToBase();*/
     }
     else
     {
@@ -115,6 +126,7 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
         ui->logsBox->clear();
         ui->logsBox->addItems(List);
         QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        qDebug() << Dir.path();
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
         ui->logBrowser->clear();
@@ -126,6 +138,14 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
         ui->logBrowser->clear();
         ui->logsBox->clear();
     }
+}
+
+void StatsWindow::showTable(QString tableName)
+{
+    m_tableModel->setTable(tableName);
+    m_tableModel->select();
+    m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
+    ui->tableView->setModel(m_tableModel);
 }
 
 void StatsWindow::on_toolButton_clicked()
