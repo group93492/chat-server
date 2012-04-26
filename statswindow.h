@@ -36,7 +36,7 @@ private slots:
     void on_dateEdit_dateChanged(const QDate &date);
     void on_toolButton_clicked();
     void on_pushButton_clicked();
-	void showTable(QString tableName);
+    void showTable(QString tableName);
 };
 
 #endif // STATSWINDOW_H

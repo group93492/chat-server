@@ -27,6 +27,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui->tableComboBox->addItem("clients");
     ui->tableComboBox->addItem("channels");
     ui->tableComboBox->addItem("membership");
+    showTable("clients");
 }
 
 StatsWindow::~StatsWindow()
