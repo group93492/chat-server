@@ -25,6 +25,7 @@ private:
     ConfigManager *m_settings;
     Logger *m_logs;
     bool errorFilter(QVector<QString> vector, QString str);
+    QSqlTableModel *m_tableModel;
 private slots:
     void startServer();
     void logServerMessage(QString &message);
@@ -33,6 +34,7 @@ private slots:
     void addToComboBox(QStringList List);
     void on_logsBox_currentIndexChanged(const QString &arg1);
     void on_dateEdit_dateChanged(const QDate &date);
+    void showTable(QString tableName);
     void on_toolButton_clicked();
     void on_pushButton_clicked();
 };
