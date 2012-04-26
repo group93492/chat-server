@@ -283,7 +283,6 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         list->channelList = m_clientList.getChannelsForClient(msg->nick);
     }
     sendMessageToClient(socket, list);
-    delete msg;
     delete list;
 }
 
@@ -306,7 +305,6 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
     answer->channelName = msg->channelName;
     sendMessageToClient(socket, answer);
     delete answer;
-    delete msg;
 }
 
 void ChatServer::processMessage(ChannelLeaveMessage *msg)
@@ -319,7 +317,6 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
     }
-    delete msg;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
