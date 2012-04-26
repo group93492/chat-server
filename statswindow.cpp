@@ -69,6 +69,7 @@ void StatsWindow::startServer()
         msg = "Unable to start server.";
         m_logs->AddToServerLog(esFatal, msg);
     }
+
 }
 
 void StatsWindow::logServerMessage(QString &message)
@@ -126,6 +127,7 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
         ui->logsBox->clear();
         ui->logsBox->addItems(List);
         QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        qDebug() << Dir.path();
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
         ui->logBrowser->clear();
