@@ -11,15 +11,15 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_server = new ChatServer(this);
     m_logs = new Logger(this);
     m_tableModel = new QSqlTableModel;
-    connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startServer()));
+    connect(ui->startServerButton, SIGNAL(clicked()), this, SLOT(startServer()));
     connect(m_settings, SIGNAL(configChatServerSignal(ChatServerConfig*)), m_server, SLOT(setConfig(ChatServerConfig*)));
     connect(m_settings, SIGNAL(configLoggerSignal(LoggerConfig*)), m_logs, SLOT(SetSettings(LoggerConfig*)));
     connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
     connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
     connect(m_logs, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
     connect(m_logs, SIGNAL(addToListOfLogs(QStringList)), this, SLOT(addToComboBox(QStringList)));
-    connect(ui->logsBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
-    connect(ui->tableComboBox, SIGNAL(currentIndexChanged(QString)), this , SLOT(showTable(QString)));
+    connect(ui->chooseLogToShowBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
+    connect(ui->chooseTableToShowBox, SIGNAL(currentIndexChanged(QString)), this , SLOT(showTable(QString)));
     m_settings->ReadConfig();
     m_settings->sendSignals();
     m_logs->StartLogger();
@@ -27,9 +27,9 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui->logPathEdit->setText(m_settings->p_LoggerConfig->Path);
     ui->tabWidget->setCurrentIndex(0); //we must always see start tab after the program launching
 
-    ui->tableComboBox->addItem("clients");
-    ui->tableComboBox->addItem("channels");
-    ui->tableComboBox->addItem("membership");
+    ui->chooseTableToShowBox->addItem("clients");
+    ui->chooseTableToShowBox->addItem("channels");
+    ui->chooseTableToShowBox->addItem("membership");
 }
 
 StatsWindow::~StatsWindow()
@@ -56,7 +56,7 @@ void StatsWindow::startServer()
     QString msg;
     if (m_server->startServer(port))
     {
-        ui->startButton->setEnabled(false);
+        ui->startServerButton->setEnabled(false);
         msg = QString("Server started on localhost:%1")
                                .arg(m_settings->p_ChatServerConfig->port);
         m_logs->AddToServerLog(esNotify, msg);
@@ -84,17 +84,17 @@ void StatsWindow::on_portEdit_editingFinished()
     m_settings->p_ChatServerConfig->port = ui->portEdit->text().toUInt();
 }
 
-void StatsWindow::on_SettingsButton_clicked()
+void StatsWindow::on_saveSettingsButton_clicked()
 {
     m_settings->WriteConfig();
 }
 
 void StatsWindow::addToComboBox(QStringList List)
 {
-    ui->logsBox->addItems(List);
+    ui->chooseLogToShowBox->addItems(List);
 }
 
-void StatsWindow::on_logsBox_currentIndexChanged(const QString &arg1)
+void StatsWindow::on_chooseLogToShowBox_currentIndexChanged(const QString &arg1)
 {
     QDir Dir;
     Dir.setCurrent(QDir::currentPath());
@@ -112,7 +112,7 @@ void StatsWindow::on_logsBox_currentIndexChanged(const QString &arg1)
     else
     {
         ui->logBrowser->clear();
-        ui->logsBox->clear();
+        ui->chooseLogToShowBox->clear();
     }
 }
 
@@ -126,9 +126,9 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
     {
         QStringList List;
         List = Dir.entryList(QDir::Files, QDir::Name);
-        ui->logsBox->clear();
-        ui->logsBox->addItems(List);
-        QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        ui->chooseLogToShowBox->clear();
+        ui->chooseLogToShowBox->addItems(List);
+        QFile file(QString(Dir.path() + "/" + ui->chooseLogToShowBox->currentText()));
         qDebug() << Dir.path();
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
@@ -139,29 +139,29 @@ void StatsWindow::on_dateEdit_dateChanged(const QDate &date)
     else
     {
         ui->logBrowser->clear();
-        ui->logsBox->clear();
+        ui->chooseLogToShowBox->clear();
     }
 }
 
-void StatsWindow::on_toolButton_clicked()
+void StatsWindow::on_setLogPathButton_clicked()
 {
     ui->logPathEdit->setText(QFileDialog::getExistingDirectory());
     m_settings->p_LoggerConfig->Path = ui->logPathEdit->text();
 }
 
-void StatsWindow::on_pushButton_clicked()
+void StatsWindow::on_applyFilterButton_clicked()
 {
     ui->logBrowser->clear();
     QVector<QString> errorRules;
-    if(ui->notifycheckBox->checkState())
+    if(ui->notifyCheckBox->checkState())
         errorRules.append("[Notify]");
-    if(ui->minorcheckBox->checkState())
+    if(ui->minorCheckBox->checkState())
         errorRules.append("[Minor]");
-    if(ui->warningcheckBox->checkState())
+    if(ui->warningCheckBox->checkState())
         errorRules.append("[Warning]");
-    if(ui->criticalcheckBox->checkState())
+    if(ui->criticalCheckBox->checkState())
         errorRules.append("[Critical]");
-    if(ui->fatalcheckBox->checkState())
+    if(ui->fatalCheckBox->checkState())
         errorRules.append("[Fatal]");
     QDir Dir;
     Dir.setCurrent(QDir::currentPath());
@@ -171,9 +171,9 @@ void StatsWindow::on_pushButton_clicked()
     {
         QString str;
         QString time;
-        QString lefttime = ui->timeEdit->time().toString("[hh:mm:ss]");
-        QString righttime = ui->timeEdit_2->time().toString("[hh:mm:ss]");
-        QFile file(QString(Dir.path() + "/" + ui->logsBox->currentText()));
+        QString lefttime = ui->fromTimeEdit->time().toString("[hh:mm:ss]");
+        QString righttime = ui->tillTimeEdit->time().toString("[hh:mm:ss]");
+        QFile file(QString(Dir.path() + "/" + ui->chooseLogToShowBox->currentText()));
         file.open(QIODevice::ReadOnly);
         QTextStream in(&file);
         while(!(in.atEnd()))
@@ -192,5 +192,5 @@ void StatsWindow::showTable(QString tableName)
     m_tableModel->setTable(tableName);
     m_tableModel->select();
     m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
-    ui->tableView->setModel(m_tableModel);
+    ui->currentTableView->setModel(m_tableModel);
 }
