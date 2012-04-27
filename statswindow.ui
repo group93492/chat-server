@@ -27,7 +27,7 @@
      <enum>QTabWidget::North</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="configTab">
      <attribute name="title">
@@ -270,6 +270,13 @@
          <height>23</height>
         </rect>
        </property>
+       <property name="time">
+        <time>
+         <hour>23</hour>
+         <minute>59</minute>
+         <second>59</second>
+        </time>
+       </property>
       </widget>
       <widget class="QLabel" name="showEventLabel">
        <property name="geometry">
@@ -425,7 +432,7 @@
      <x>0</x>
      <y>0</y>
      <width>601</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

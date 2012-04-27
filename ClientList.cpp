@@ -435,7 +435,7 @@ GeneralClientList::RegResult GeneralClientList::registrate(QString username, QSt
 //    m_DB.addMembership(username, "main");
     //autojoining all channels - shold be deleted soon
     for (int i = 0; i < m_channelList.count(); ++i)
-        joinChannel(username, m_channelList[i].name());
+        m_DB.addMembership(username, m_channelList[i].name());
     //
     return GeneralClientList::rrRegSuccess;
 }
