@@ -60,6 +60,7 @@ void StatsWindow::startServer()
         m_logs->AddToServerLog(esNotify, msg);
         connect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
         connect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
+        connect(m_server, SIGNAL(updateTable(QString)), this, SLOT(showTable(QString)));
         /*connect(m_server->DataBase, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
         connect(this, SIGNAL(lookTableSgnl(QTableView*, QString)), m_server->DataBase, SLOT(lookTable(QTableView*, QString)));
         m_server->DataBase->connectToBase();*/
@@ -187,8 +188,11 @@ void StatsWindow::on_applyFilterButton_clicked()
 
 void StatsWindow::showTable(QString tableName)
 {
-    m_tableModel->setTable(tableName);
-    m_tableModel->select();
-    m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
-    ui->currentTableView->setModel(m_tableModel);
+    if(ui->chooseTableToShowBox->currentText() == tableName)
+    {
+        m_tableModel->setTable(tableName);
+        m_tableModel->select();
+        m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
+        ui->currentTableView->setModel(m_tableModel);
+    }
 }

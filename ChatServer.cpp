@@ -252,6 +252,8 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
     case GeneralClientList::rrRegSuccess:
         {
             answer->registrationResult = true;
+            emit updateTable("clients");
+            emit updateTable("membership");
             break;
         }
     }
@@ -297,6 +299,7 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         newmsg->msg = msg->nick + " join to channel";
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
+        emit updateTable("membership");
     }
     else
     {
@@ -316,6 +319,7 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         newmsg->msg = msg->nick + " leave from channel";
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
+        updateTable("membership");
     }
 }
 

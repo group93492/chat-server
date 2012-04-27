@@ -36,6 +36,7 @@ public:
 signals:
     void serverLog(ErrorStatus, QString &message);
     void channelLog(QString &name, QString &message);
+    void updateTable(QString tablename);
 
 private slots:
     void serverGotNewConnection();
