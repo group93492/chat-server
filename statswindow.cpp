@@ -25,6 +25,8 @@ StatsWindow::StatsWindow(QWidget *parent) :
     m_logs->StartLogger();
     ui->portEdit->setText(QString::number(m_settings->p_ChatServerConfig->port));
     ui->logPathEdit->setText(m_settings->p_LoggerConfig->Path);
+    ui->tabWidget->setCurrentIndex(0); //we must always see start tab after the program launching
+
     ui->tableComboBox->addItem("clients");
     ui->tableComboBox->addItem("channels");
     ui->tableComboBox->addItem("membership");
