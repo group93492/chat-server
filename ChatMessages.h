@@ -28,9 +28,14 @@ enum ChatMessageType
 class ChatMessageBody
 {
 public:
-    ChatMessageBody() {}
+    ChatMessageBody() { streamStatus = Ok; }
     virtual ~ChatMessageBody() {}
     quint8 messageType;
+    enum Status {
+        Ok,
+        Failed
+    };
+    Status streamStatus;
     virtual bool pack(QDataStream &stream) const = 0;
     virtual bool unpack(QDataStream &stream) = 0;
 };
@@ -43,6 +48,12 @@ public:
     ChatMessageHeader(QDataStream &stream);
     quint8 messageType;
     quint32 messageSize;
+
+    enum Status {
+        Ok,
+        Failed
+    };
+    Status streamStatus;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

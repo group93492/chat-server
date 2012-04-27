@@ -4,6 +4,7 @@ ChatMessageHeader::ChatMessageHeader(const ChatMessageBody *msgBody)
 {
     messageType = msgBody->messageType;
     messageSize = sizeof(*msgBody);
+    streamStatus = Ok;
 }
 
 ChatMessageHeader::ChatMessageHeader(QDataStream &stream)
@@ -16,7 +17,12 @@ ChatMessageHeader::ChatMessageHeader(QDataStream &stream)
 bool ChatMessageHeader::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << messageType;
     return true;
 }
@@ -24,7 +30,13 @@ bool ChatMessageHeader::pack(QDataStream &stream) const
 bool ChatMessageHeader::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
+    return false;
     stream >> messageType;
     return true;
 }
@@ -45,7 +57,12 @@ AuthorizationAnswer::AuthorizationAnswer(QDataStream &stream)
 bool AuthorizationAnswer::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     if(authorizationResult)
         stream << authorizationResult;
     else
@@ -56,7 +73,12 @@ bool AuthorizationAnswer::pack(QDataStream &stream) const
 bool AuthorizationAnswer::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> authorizationResult;
     if(!authorizationResult)
         stream >> denialReason;
@@ -79,7 +101,12 @@ AuthorizationRequest::AuthorizationRequest(QDataStream &stream)
 bool AuthorizationRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << username << password;
     return true;
 }
@@ -87,7 +114,12 @@ bool AuthorizationRequest::pack(QDataStream &stream) const
 bool AuthorizationRequest::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> username >> password;
     return true;
 }
@@ -109,7 +141,12 @@ ChannelMessage::ChannelMessage(QDataStream &stream)
 bool ChannelMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << sender << receiver << messageText;
     return true;
 }
@@ -117,7 +154,12 @@ bool ChannelMessage::pack(QDataStream &stream) const
 bool ChannelMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> sender >> receiver >> messageText;
     return true;
 }
@@ -136,7 +178,12 @@ DisconnectMessage::DisconnectMessage(QDataStream &stream)
 bool DisconnectMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
-            return false;
+    {
+        Status = Failed;
+        return false;
+    }
+    else
+        Status = Ok;
     stream << sender;
     return true;
 }
@@ -144,7 +191,12 @@ bool DisconnectMessage::pack(QDataStream &stream) const
 bool DisconnectMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> sender;
     return true;
 }
@@ -163,7 +215,12 @@ RegistrationRequest::RegistrationRequest(QDataStream &stream)
 bool RegistrationRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << username << password;
     return true;
 }
@@ -171,7 +228,12 @@ bool RegistrationRequest::pack(QDataStream &stream) const
 bool RegistrationRequest::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> username >> password;
     return true;
 }
@@ -190,7 +252,12 @@ RegistrationAnswer::RegistrationAnswer(QDataStream &stream)
 bool RegistrationAnswer::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     if(registrationResult)
         stream << registrationResult;
     else
@@ -201,7 +268,12 @@ bool RegistrationAnswer::pack(QDataStream &stream) const
 bool RegistrationAnswer::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> registrationResult;
     if(!registrationResult)
         stream >> denialReason;
@@ -222,7 +294,12 @@ ChannelListMessage::ChannelListMessage(QDataStream &stream)
 bool ChannelListMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << quint8(listType) << channelList;
     return true;
 }
@@ -230,7 +307,12 @@ bool ChannelListMessage::pack(QDataStream &stream) const
 bool ChannelListMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     quint8 tempType;
     stream >> tempType >> channelList;
     listType = (ChannelListMessage::ListType) tempType;
@@ -251,7 +333,12 @@ ChannelInfoMessage::ChannelInfoMessage(QDataStream &stream)
 bool ChannelInfoMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << channelName << channelDescription << channelTopic;
     stream << channelMembers;
     return true;
@@ -260,7 +347,12 @@ bool ChannelInfoMessage::pack(QDataStream &stream) const
 bool ChannelInfoMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> channelName >> channelDescription >> channelTopic;
     stream >> channelMembers;
     return true;
@@ -269,7 +361,12 @@ bool ChannelInfoMessage::unpack(QDataStream &stream)
 bool ChannelListRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << quint8(listType) << nick;
     return true;
 }
@@ -277,7 +374,12 @@ bool ChannelListRequest::pack(QDataStream &stream) const
 bool ChannelListRequest::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     quint8 tempType;
     stream >> tempType >> nick;
     listType = (ChannelListRequest::ListType) tempType;
@@ -309,7 +411,12 @@ ChannelJoinRequest::ChannelJoinRequest(QDataStream &stream)
 bool ChannelJoinRequest::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << nick << channelName;
     return true;
 }
@@ -317,7 +424,12 @@ bool ChannelJoinRequest::pack(QDataStream &stream) const
 bool ChannelJoinRequest::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> nick >> channelName;
     return true;
 }
@@ -336,7 +448,12 @@ ChannelJoinResult::ChannelJoinResult(QDataStream &stream)
 bool ChannelJoinResult::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << result << channelName;
     return true;
 }
@@ -344,7 +461,12 @@ bool ChannelJoinResult::pack(QDataStream &stream) const
 bool ChannelJoinResult::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> result >> channelName;
     return true;
 }
@@ -363,7 +485,12 @@ ChannelLeaveMessage::ChannelLeaveMessage(QDataStream &stream)
 bool ChannelLeaveMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << nick << channelName;
     return true;
 }
@@ -371,7 +498,12 @@ bool ChannelLeaveMessage::pack(QDataStream &stream) const
 bool ChannelLeaveMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> nick >> channelName;
     return true;
 }
@@ -390,7 +522,12 @@ ChannelSystemMessage::ChannelSystemMessage(QDataStream &stream)
 bool ChannelSystemMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream << msg;
     return true;
 }
@@ -398,7 +535,12 @@ bool ChannelSystemMessage::pack(QDataStream &stream) const
 bool ChannelSystemMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
+    {
+        Status = Failed;
         return false;
+    }
+    else
+        Status = Ok;
     stream >> msg;
     return true;
 }
