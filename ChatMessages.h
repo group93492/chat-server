@@ -197,7 +197,8 @@ class ChannelSystemMessage : public ChatMessageBody
 public:
     ChannelSystemMessage();
     ChannelSystemMessage(QDataStream &stream);
-    QString msg;
+    QString channelName;
+    QString message;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

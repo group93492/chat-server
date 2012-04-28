@@ -391,7 +391,7 @@ bool ChannelSystemMessage::pack(QDataStream &stream) const
 {
     if (stream.status() != QDataStream::Ok)
         return false;
-    stream << msg;
+    stream << channelName << message;
     return true;
 }
 
@@ -399,7 +399,7 @@ bool ChannelSystemMessage::unpack(QDataStream &stream)
 {
     if (stream.status() != QDataStream::Ok)
         return false;
-    stream >> msg;
+    stream >> channelName >> message;
     return true;
 }
 

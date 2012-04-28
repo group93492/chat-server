@@ -296,7 +296,8 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         m_clientList.joinChannel(msg->nick, msg->channelName);
         answer->result = true;
         ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->msg = msg->nick + " join to channel";
+        newmsg->message = msg->nick + " join to channel";
+        newmsg->channelName = msg->channelName;
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
         emit updateTable("membership");
@@ -316,7 +317,8 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
     {
         m_clientList.leaveChannel(msg->nick, msg->channelName);
         ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->msg = msg->nick + " leave from channel";
+        newmsg->message = msg->nick + " leave from channel";
+        newmsg->channelName = msg->channelName;
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
         updateTable("membership");
