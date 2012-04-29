@@ -113,6 +113,13 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtChannelCreateRequest:
+            {
+                ChannelCreateRequest*msg = new ChannelCreateRequest(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
         default:
             {
                 QString log = "Server received unknown-typed message" + msgType;
@@ -298,6 +305,11 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         newmsg->channelName = msg->channelName;
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
+        ChannelListMessage *listUpdate = new ChannelListMessage();
+        listUpdate->listType = ChannelListMessage::listOfJoined;
+        listUpdate->channelList = m_clientList.getChannelsForClient(msg->nick);
+        sendMessageToClient(msg->nick, listUpdate);
+        delete listUpdate;
         emit updateTable("membership");
     }
     else
@@ -320,13 +332,56 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         sendMessageToChannel(msg->channelName, newmsg);
         channelLog(msg->channelName, newmsg->message);
         delete newmsg;
-        updateTable("membership");
+        emit updateTable("membership");
     }
     ChannelListMessage *listUpdate = new ChannelListMessage();
     listUpdate->listType = ChannelListMessage::listOfJoined;
     listUpdate->channelList = m_clientList.getChannelsForClient(msg->nick);
     sendMessageToClient(msg->nick, listUpdate);
     delete listUpdate;
+}
+
+void ChatServer::processMessage(ChannelCreateRequest *msg)
+{
+    ChannelCreateResult *result = new ChannelCreateResult();
+    switch (m_clientList.createChannel(msg->username,
+                                     msg->channelName,
+                                     msg->channelDescription,
+                                     msg->channelTopic))
+    {
+    case GeneralClientList::ccrTooManyChannels:
+        {
+            result->answer = false;
+            result->denialReason = "Too many channels already created on server.";
+        }
+    case GeneralClientList::ccrBadName:
+        {
+            result->answer = false;
+            result->denialReason = "Name of channel is already reserved";
+        }
+    case GeneralClientList::ccrSuccess:
+        {
+            result->answer = true;
+        }
+    }
+    sendMessageToClient(msg->username, result);
+    if (result->answer)
+    {
+        m_clientList.joinChannel(msg->username, msg->channelName);
+        ChannelSystemMessage *joinMsg = new ChannelSystemMessage();
+        joinMsg->message = msg->username + " joined channel";
+        joinMsg->channelName = msg->channelName;
+        sendMessageToClient(msg->username, joinMsg);
+        delete joinMsg;
+        ChannelListMessage *listUpdate = new ChannelListMessage();
+        listUpdate->listType = ChannelListMessage::listOfJoined;
+        listUpdate->channelList = m_clientList.getChannelsForClient(msg->username);
+        sendMessageToClient(msg->username, listUpdate);
+        delete listUpdate;
+        emit updateTable("channels");
+        emit updateTable("membership");
+    }
+    delete result;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
