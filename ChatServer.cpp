@@ -322,6 +322,11 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         delete newmsg;
         updateTable("membership");
     }
+    ChannelListMessage *listUpdate = new ChannelListMessage();
+    listUpdate->listType = ChannelListMessage::listOfJoined;
+    listUpdate->channelList = m_clientList.getChannelsForClient(msg->nick);
+    sendMessageToClient(msg->nick, listUpdate);
+    delete listUpdate;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
