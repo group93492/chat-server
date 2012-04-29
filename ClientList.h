@@ -124,6 +124,12 @@ public:
         rrOccupiedUsername,
         rrRegSuccess
     };
+    enum CreateChannelResult
+    {
+        ccrTooManyChannels,
+        ccrBadName,
+        ccrSuccess
+    };
     explicit GeneralClientList(QObject *parent = 0);
     void readChannelsFromDB();
     ChatChannel getChannel(QString &channelName);
@@ -137,6 +143,7 @@ public:
     void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
+    CreateChannelResult createChannel(QString username, QString channelName, QString description, QString topic);
 signals:
     void logMessage(ErrorStatus, QString &);
 private slots:

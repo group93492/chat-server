@@ -523,6 +523,23 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
     m_DB.deleteMembership(username, channelName);
 }
 
+GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString username, QString channelName, QString description, QString topic)
+{
+    int maxChannelCount = 50;
+    if (m_channelList.count() >= maxChannelCount)
+        return ccrTooManyChannels;
+    for (int i = 0; i < m_channelList.count(); i++)
+        if (m_channelList[i].name() == channelName)
+            return ccrBadName;
+    ChatChannel newChannel;
+    newChannel.setDescription(description);
+    newChannel.setName(channelName);
+    newChannel.setTopic(topic);
+    m_DB.setChannel(newChannel);
+    m_channelList.append(newChannel);
+    return ccrSuccess;
+}
+
 void GeneralClientList::replyLog(ErrorStatus status, QString &param)
 {
     emit logMessage(status, param);
