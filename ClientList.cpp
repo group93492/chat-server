@@ -351,6 +351,21 @@ void DBManager::addMembership(QString username, QString channelName)
     }
 }
 
+void DBManager::deleteMembership(QString username, QString channel)
+{
+    QSqlQuery query;
+    QString q = QString("DELETE FROM '%1' WHERE client = '%3' AND channel = '%4';")
+                                                    .arg(m_membershipTableName)
+                                                    .arg(username)
+                                                    .arg(channel);
+    if (!query.exec(q))
+    {
+        QString msg("SQL query error in deleting membership: %1");
+        msg.arg(query.lastError().text());
+        emit logMessage(esWarning, msg);
+    }
+}
+
 QVector<ChatChannel> DBManager::getChannelList()
 {
     QVector<ChatChannel> channels;
@@ -503,7 +518,9 @@ void GeneralClientList::joinChannel(QString username, QString channelName)
 
 void GeneralClientList::leaveChannel(QString username, QString channelName)
 {
-
+    if (channelName == "main" || !m_DB.isMembership(username, channelName))
+        return;
+    m_DB.deleteMembership(username, channelName);
 }
 
 void GeneralClientList::replyLog(ErrorStatus status, QString &param)

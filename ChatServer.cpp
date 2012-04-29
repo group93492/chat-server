@@ -206,9 +206,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
 //that's simple
 //we need only to delete client from client list
 //and close his socket
-
 //also we should reply disconnect fact in all client's channels
-//TODO:
 {
     if (!msg)
     {
@@ -296,7 +294,7 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         m_clientList.joinChannel(msg->nick, msg->channelName);
         answer->result = true;
         ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->message = msg->nick + " join to channel";
+        newmsg->message = msg->nick + " joined channel";
         newmsg->channelName = msg->channelName;
         sendMessageToChannel(msg->channelName, newmsg);
         delete newmsg;
@@ -317,9 +315,10 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
     {
         m_clientList.leaveChannel(msg->nick, msg->channelName);
         ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->message = msg->nick + " leave from channel";
+        newmsg->message = msg->nick + " left channel";
         newmsg->channelName = msg->channelName;
         sendMessageToChannel(msg->channelName, newmsg);
+        channelLog(msg->channelName, newmsg->message);
         delete newmsg;
         updateTable("membership");
     }
