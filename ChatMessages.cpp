@@ -403,3 +403,62 @@ bool ChannelSystemMessage::unpack(QDataStream &stream)
     return true;
 }
 
+ChannelCreateRequest::ChannelCreateRequest()
+{
+    messageType = cmtChannelCreateRequest;
+}
+
+ChannelCreateRequest::ChannelCreateRequest(QDataStream &stream)
+{
+     messageType = cmtChannelCreateRequest;
+     unpack(stream);
+}
+
+bool ChannelCreateRequest::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username << channelName << channelDescription << channelTopic;
+    return true;
+}
+
+bool ChannelCreateRequest::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username >> channelName >> channelDescription >> channelTopic;
+    return true;
+}
+
+ChannelCreateResult::ChannelCreateResult()
+{
+    messageType = cmtChannelCreateResult;
+}
+
+ChannelCreateResult::ChannelCreateResult(QDataStream &stream)
+{
+    messageType = cmtChannelCreateResult;
+    unpack(stream);
+}
+
+bool ChannelCreateResult::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    if(answer)
+        stream << answer;
+    else
+        stream << answer << denialReason;
+    return true;
+}
+
+bool ChannelCreateResult::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> answer;
+    if(answer)
+        stream << denialReason;
+    return true;
+}
+
