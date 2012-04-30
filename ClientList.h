@@ -97,6 +97,7 @@ public:
     //membership table
     bool isMembership(QString username, QString channelName);
     void addMembership(QString username, QString channelName);
+    void deleteMembership(QString username, QString channel);
     // methods for initializing channels in general client list
     QVector<ChatChannel> getChannelList();
 signals:
