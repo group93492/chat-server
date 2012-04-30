@@ -190,11 +190,6 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
     if (answer->authorizationResult)
     {
         sendMessageToClient(msg->username, answer);
-        ChannelListMessage *channelsMsg = new ChannelListMessage();
-        channelsMsg->channelList = m_clientList.getChannelsForClient(msg->username);
-        channelsMsg->listType = ChannelListMessage::listOfJoined;
-        sendMessageToClient(msg->username, channelsMsg);
-        delete channelsMsg;
     }
     else
         sendMessageToClient(socket, answer);
