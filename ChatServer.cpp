@@ -219,6 +219,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     QStringList channels = m_clientList.getChannelsForClient(msg->sender).keys();
     for (int i = 0; i < channels.count(); ++i)
         sendMessageToChannel(channels[i], msg);
+    m_clientList.disconnect(msg->sender);
 }
 
 void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
