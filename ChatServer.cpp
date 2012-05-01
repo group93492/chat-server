@@ -216,11 +216,18 @@ void ChatServer::processMessage(DisconnectMessage *msg)
         emit serverLog(esMinor, log);
         return;
     }
-    QString messageText = msg->sender + " was disconnected from server";
+    QString messageText = msg->sender + " was disconnected from server.";
     emit serverLog(esNotify, messageText);
     QStringList channels = m_clientList.getChannelsForClient(msg->sender).keys();
+    ChannelSystemMessage *inform = new ChannelSystemMessage();
+    inform->message = msg->sender+ " leaved chat.";
     for (int i = 0; i < channels.count(); ++i)
-        sendMessageToChannel(channels[i], msg);
+    {
+        inform->channelName = channels[i];
+        sendMessageToChannel(channels[i], inform);
+    }
+    delete inform;
+    m_clientList.disconnect(msg->sender);
 }
 
 void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
