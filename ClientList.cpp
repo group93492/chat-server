@@ -392,9 +392,11 @@ QVector<ChatChannel> DBManager::getChannelList()
 
 ChatChannel GeneralClientList::getChannel(QString &channelName)
 {
+    ChatChannel result;
     for (int i = 0; i < m_channelList.count(); ++i)
         if (m_channelList[i].name() == channelName)
-            return m_channelList[i];
+            result = m_channelList[i];
+    return result;
 }
 
 bool GeneralClientList::hasChannel(QString channelName)
@@ -426,6 +428,18 @@ QMap<QString, QString> GeneralClientList::getChannelsForClient(QString username)
         if (m_DB.isMembership(username, m_channelList[i].name()))
             channels.insert(m_channelList[i].name(), m_channelList[i].description());
     return channels;
+}
+
+QStringList GeneralClientList::getClientsForChannel(QString channelName)
+{
+    QStringList result;
+    for (int i = 0; i < m_channelList.count(); i++)
+        if (m_channelList[i].name() == channelName)
+        {
+            result = m_channelList[i].userList;
+            break;
+        }
+    return result;
 }
 
 QMap<QString, QString> GeneralClientList::getAllChanells()
@@ -523,7 +537,9 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
     m_DB.deleteMembership(username, channelName);
 }
 
-GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString username, QString channelName, QString description, QString topic)
+GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString channelName,
+                                                                        QString description,
+                                                                        QString topic)
 {
     int maxChannelCount = 50;
     if (m_channelList.count() >= maxChannelCount)

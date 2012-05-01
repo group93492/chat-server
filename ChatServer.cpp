@@ -339,8 +339,7 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
 void ChatServer::processMessage(ChannelCreateRequest *msg)
 {
     ChannelCreateResult *result = new ChannelCreateResult();
-    switch (m_clientList.createChannel(msg->username,
-                                     msg->channelName,
+    switch (m_clientList.createChannel(msg->channelName,
                                      msg->channelDescription,
                                      msg->channelTopic))
     {

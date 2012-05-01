@@ -137,13 +137,14 @@ public:
     ChatClient getClient(const QString &username);
     bool hasClient(QString username);
     QMap<QString, QString> getChannelsForClient(QString username);
+    QStringList getClientsForChannel(QString channelName);
     QMap<QString, QString> getAllChanells();
     RegResult registrate(QString username, QString password);
     AuthResult authorize(QString username, QString password, QTcpSocket *socket);
     void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
-    CreateChannelResult createChannel(QString username, QString channelName, QString description, QString topic);
+    CreateChannelResult createChannel(QString channelName, QString description, QString topic);
 signals:
     void logMessage(ErrorStatus, QString &);
 private slots:
