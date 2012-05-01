@@ -27,7 +27,7 @@
      <enum>QTabWidget::North</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="configTab">
      <attribute name="title">
@@ -395,9 +395,12 @@
        <rect>
         <x>10</x>
         <y>40</y>
-        <width>481</width>
-        <height>471</height>
+        <width>551</width>
+        <height>431</height>
        </rect>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
       </property>
      </widget>
      <widget class="QComboBox" name="chooseTableToShowBox">
@@ -421,6 +424,35 @@
       </property>
       <property name="text">
        <string>Table:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="addRecordPushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>470</y>
+        <width>191</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Добавить пустую запись</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="deleteRecordPushButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>470</y>
+        <width>191</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Удалить выделенную запись</string>
       </property>
      </widget>
     </widget>
