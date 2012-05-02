@@ -23,7 +23,8 @@ enum ChatMessageType
     cmtChannelLeaveMessage,
     cmtChannelSystemMessage,
     cmtChannelCreateRequest,
-    cmtChannelCreateResult
+    cmtChannelCreateResult,
+    cmtChannelUserList
     /*etc*/
 };
 
@@ -225,6 +226,17 @@ public:
     ChannelCreateResult(QDataStream &stream);
     bool answer;
     QString denialReason;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelUserList: public ChatMessageBody
+{
+public:
+    ChannelUserList();
+    ChannelUserList(QDataStream &stream);
+    QString channelName;
+    QStringList userList;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

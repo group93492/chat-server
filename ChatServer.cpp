@@ -193,7 +193,7 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
             answer->authorizationResult = true;
             break;
         }
-    }    
+    }
     if (answer->authorizationResult)
     {
         sendMessageToClient(msg->username, answer);
@@ -220,14 +220,20 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     emit serverLog(esNotify, messageText);
     QStringList channels = m_clientList.getChannelsForClient(msg->sender).keys();
     ChannelSystemMessage *inform = new ChannelSystemMessage();
+    ChannelUserList *list;
     inform->message = msg->sender+ " leaved chat.";
+    m_clientList.disconnect(msg->sender);
     for (int i = 0; i < channels.count(); ++i)
     {
+        list = new ChannelUserList();
+        list->channelName = channels[i];
+        list->userList = m_clientList.getClientsForChannel(channels[i]);
+        sendMessageToChannel(channels[i], list);
+        delete list;
         inform->channelName = channels[i];
         sendMessageToChannel(channels[i], inform);
     }
     delete inform;
-    m_clientList.disconnect(msg->sender);
 }
 
 void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
@@ -285,6 +291,11 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
     {
         list->listType = ChannelListMessage::listOfAll;
         list->channelList = m_clientList.getAllChanells();
+        ChannelUserList *list = new ChannelUserList();
+        list->channelName = "main";
+        list->userList = m_clientList.getClientsForChannel("main");
+        sendMessageToChannel("main", list);
+        delete list;
     }
     else
     {
@@ -313,6 +324,11 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         sendMessageToClient(msg->nick, listUpdate);
         delete listUpdate;
         emit updateTable("membership");
+        ChannelUserList *list = new ChannelUserList();
+        list->channelName = msg->channelName;
+        list->userList = m_clientList.getClientsForChannel(msg->channelName);
+        sendMessageToChannel(msg->channelName, list);
+        delete list;
     }
     else
     {
@@ -335,6 +351,11 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         channelLog(msg->channelName, newmsg->message);
         delete newmsg;
         emit updateTable("membership");
+        ChannelUserList *list = new ChannelUserList();
+        list->channelName = msg->channelName;
+        list->userList = m_clientList.getClientsForChannel(msg->channelName);
+        sendMessageToChannel(msg->channelName, list);
+        delete list;
     }
     ChannelListMessage *listUpdate = new ChannelListMessage();
     listUpdate->listType = ChannelListMessage::listOfJoined;
@@ -381,6 +402,11 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
         delete listUpdate;
         emit updateTable("channels");
         emit updateTable("membership");
+        ChannelUserList *list = new ChannelUserList();
+        list->channelName = msg->channelName;
+        list->userList = m_clientList.getClientsForChannel(msg->channelName);
+        sendMessageToChannel(msg->channelName, list);
+        delete list;
     }
     delete result;
 }

@@ -462,3 +462,29 @@ bool ChannelCreateResult::unpack(QDataStream &stream)
     return true;
 }
 
+ChannelUserList::ChannelUserList()
+{
+    messageType = cmtChannelUserList;
+}
+
+ChannelUserList::ChannelUserList(QDataStream &stream)
+{
+    messageType = cmtChannelUserList;
+    unpack(stream);
+}
+
+bool ChannelUserList::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << channelName << userList;
+    return true;
+}
+
+bool ChannelUserList::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> channelName >> userList;
+    return true;
+}
