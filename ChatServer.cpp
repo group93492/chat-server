@@ -194,12 +194,32 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
             break;
         }
     }
+    sendMessageToClient(socket, answer);
     if (answer->authorizationResult)
     {
-        sendMessageToClient(msg->username, answer);
+        QStringList channels = m_clientList.getChannelsForClient(msg->username).keys();
+        ChannelSystemMessage *informMsg = new ChannelSystemMessage();
+        ChannelUserList *updateListMsg = new ChannelUserList();
+        informMsg->message = msg->username + " entered chat.";
+        for (int i = 0; i < channels.count(); ++i)
+        {
+            informMsg->channelName = channels[i];
+            updateListMsg->channelName = channels[i];
+            ChatChannel channel = m_clientList.getChannel(channels[i]);
+            updateListMsg->userList = channel.userList;
+            for (int j = 0; j < channel.userList.count(); j++)
+            {
+                QString username = channel.userList[j];
+                if (username != msg->username)
+                {
+                    sendMessageToClient(username, informMsg);
+                    sendMessageToClient(username, updateListMsg);
+                }
+            }
+        }
+        delete updateListMsg;
+        delete informMsg;
     }
-    else
-        sendMessageToClient(socket, answer);
     delete answer;
 }
 
@@ -279,6 +299,7 @@ void ChatServer::processMessage(RegistrationRequest *msg, QTcpSocket *socket)
 }
 
 void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
+//new processMessage for ChannelListRequest
 {
     if (!msg)
     {
@@ -286,24 +307,29 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         emit serverLog(esMinor, log);
         return;
     }
-    ChannelListMessage *list = new ChannelListMessage();
+    ChannelListMessage *chanListMsg = new ChannelListMessage();
     if(msg->listType == ChannelListRequest::listOfAll)
     {
-        list->listType = ChannelListMessage::listOfAll;
-        list->channelList = m_clientList.getAllChanells();
-        ChannelUserList *list = new ChannelUserList();
-        list->channelName = "main";
-        list->userList = m_clientList.getClientsForChannel("main");
-        sendMessageToChannel("main", list);
-        delete list;
+        chanListMsg->listType = ChannelListMessage::listOfAll;
+        chanListMsg->channelList = m_clientList.getAllChanells();
+        sendMessageToClient(socket, chanListMsg);
     }
     else
     {
-        list->listType = ChannelListMessage::listOfJoined;
-        list->channelList = m_clientList.getChannelsForClient(msg->nick);
+        chanListMsg->listType = ChannelListMessage::listOfJoined;
+        chanListMsg->channelList = m_clientList.getChannelsForClient(msg->nick);
+        sendMessageToClient(socket, chanListMsg);
+        ChannelUserList *userListMsg = new ChannelUserList();
+        QMap<QString, QString>::iterator channel = chanListMsg->channelList.begin();
+        for(;channel != chanListMsg->channelList.end(); ++channel)
+        {
+            userListMsg->channelName = channel.key();
+            userListMsg->userList = m_clientList.getClientsForChannel(channel.key());
+            sendMessageToChannel(channel.key(), userListMsg);
+        }
+        delete userListMsg;
     }
-    sendMessageToClient(socket, list);
-    delete list;
+    delete chanListMsg;
 }
 
 void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
