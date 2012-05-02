@@ -143,6 +143,22 @@
        <enum>Qt::NoArrow</enum>
       </property>
      </widget>
+     <widget class="QPushButton" name="stopServerButton">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>304</x>
+        <y>360</y>
+        <width>121</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Stop server</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="logTab">
      <attribute name="title">
@@ -432,7 +448,7 @@
      <x>0</x>
      <y>0</y>
      <width>601</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

@@ -403,3 +403,29 @@ bool ChannelSystemMessage::unpack(QDataStream &stream)
     return true;
 }
 
+ServerShutdownMessage::ServerShutdownMessage()
+{
+    messageType = cmtServerShutdownMessage;
+}
+
+ServerShutdownMessage::ServerShutdownMessage(QDataStream &stream)
+{
+    messageType = cmtServerShutdownMessage;
+    unpack(stream);
+}
+
+bool ServerShutdownMessage::pack(QDataStream &stream) const
+{
+    if(stream.status() != QDataStream::Ok)
+        return false;
+    stream << shutdownReason;
+    return true;
+}
+
+bool ServerShutdownMessage::unpack(QDataStream &stream)
+{
+    if(stream.status() != QDataStream::Ok)
+        return false;
+    stream >> shutdownReason;
+    return true;
+}

@@ -39,6 +39,7 @@ private slots:
     void on_setLogPathButton_clicked();
     void on_applyFilterButton_clicked();
 
+    void on_stopServerButton_clicked();
 };
 
 #endif // STATSWINDOW_H

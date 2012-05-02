@@ -2,6 +2,7 @@
 
 ChatServer::ChatServer(QObject *parent) :
     QObject(parent),
+    m_tcpServer(NULL),
     m_nextBlockSize(0)
 {
 }
@@ -20,11 +21,24 @@ bool ChatServer::startServer(const quint16 nPort = defaultPort)
     return m_tcpServer->listen(QHostAddress::Any, nPort);
 }
 
-void ChatServer::stopServer()
+void ChatServer::stopServer(const QString &shutdownReason)
 //stops server
 //we need to send disconnect messages to all channels
 {
-
+    GeneralClientList::userSocketsList_t *userList = m_clientList.getAllSockets();
+    GeneralClientList::userSocketsListIterator_t itr(*userList);
+    ServerShutdownMessage msg;
+    msg.shutdownReason = shutdownReason;
+    while(itr.hasNext())
+        sendMessageToClient(itr.next(), &msg);
+    delete userList;
+    m_clientList.disconnectAll();
+    QString log = tr("Server stopped.");
+    m_tcpServer->close();
+    disconnect(m_tcpServer, SIGNAL(newConnection()), this, SLOT(serverGotNewConnection()));
+    disconnect(&m_clientList, SIGNAL(logMessage(ErrorStatus, QString&)), this, SLOT(replyLog(ErrorStatus, QString&)));
+    emit serverLog(esNotify, log);
+    delete m_tcpServer;
 }
 
 void ChatServer::serverGotNewConnection()

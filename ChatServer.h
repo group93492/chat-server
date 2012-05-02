@@ -32,7 +32,8 @@ public:
     enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
     bool startServer(const quint16 nPort);
-    void stopServer();
+    void stopServer(const QString &shutdownReason = "");
+
 signals:
     void serverLog(ErrorStatus, QString &message);
     void channelLog(QString &name, QString &message);
@@ -42,7 +43,9 @@ private slots:
     void serverGotNewConnection();
     void serverGotNewMessage();
     void replyLog(ErrorStatus status, QString &str);
+
 public slots:
+
     void setConfig(ChatServerConfig *pointer);
 };
 

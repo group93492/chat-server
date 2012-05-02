@@ -64,13 +64,24 @@ void StatsWindow::startServer()
         /*connect(m_server->DataBase, SIGNAL(logMessage(QString&)), this, SLOT(logServerMessage(QString&)));
         connect(this, SIGNAL(lookTableSgnl(QTableView*, QString)), m_server->DataBase, SLOT(lookTable(QTableView*, QString)));
         m_server->DataBase->connectToBase();*/
+        ui->stopServerButton->setEnabled(true);
     }
     else
     {
         msg = "Unable to start server.";
         m_logs->AddToServerLog(esFatal, msg);
     }
+}
 
+
+void StatsWindow::on_stopServerButton_clicked()
+{
+    m_server->stopServer();
+    disconnect(m_server, SIGNAL(serverLog(ErrorStatus,QString&)), m_logs, SLOT(AddToServerLog(ErrorStatus,QString&)));
+    disconnect(m_server, SIGNAL(channelLog(QString&,QString&)), m_logs, SLOT(AddToChannelLog(QString&,QString&)));
+    disconnect(m_server, SIGNAL(updateTable(QString)), this, SLOT(showTable(QString)));
+    ui->startServerButton->setEnabled(true);
+    ui->stopServerButton->setEnabled(false);
 }
 
 void StatsWindow::logServerMessage(QString &message)

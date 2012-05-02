@@ -21,7 +21,8 @@ enum ChatMessageType
     cmtChannelJoinRequest,
     cmtChannelJoinResult,
     cmtChannelLeaveMessage,
-    cmtChannelSystemMessage
+    cmtChannelSystemMessage,
+    cmtServerShutdownMessage
     /*etc*/
 };
 
@@ -199,6 +200,16 @@ public:
     ChannelSystemMessage(QDataStream &stream);
     QString channelName;
     QString message;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ServerShutdownMessage : public ChatMessageBody
+{
+public:
+    ServerShutdownMessage();
+    ServerShutdownMessage(QDataStream &stream);
+    QString shutdownReason;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

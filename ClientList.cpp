@@ -75,6 +75,11 @@ bool ChatChannel::hasClient(QString username)
     return userList.contains(username);
 }
 
+void ChatChannel::deleteAllClients()
+{
+    userList.clear();
+}
+
 QString &ChatChannel::topic()
 {
     return m_topic;
@@ -498,6 +503,22 @@ void GeneralClientList::disconnect(QString username)
             m_channelList[i].deleteClient(username);
     //delete client from general list
     m_generalClientList.remove(username);
+}
+
+void GeneralClientList::disconnectAll()
+{
+    QMutableVectorIterator<ChatChannel> itr(m_channelList);
+    while(itr.hasNext())
+        itr.next().deleteAllClients();
+    m_generalClientList.clear();
+}
+
+GeneralClientList::userSocketsList_t *GeneralClientList::getAllSockets()
+{
+    GeneralClientList::userSocketsList_t *result = new userSocketsList_t;
+    foreach(const ChatClient &itr, m_generalClientList.values())
+        result->append(itr.userSocket());
+    return result;
 }
 
 void GeneralClientList::joinChannel(QString username, QString channelName)

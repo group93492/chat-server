@@ -31,15 +31,16 @@ private:
     QString m_userInfo;
     QString m_userPassword;
     QTcpSocket *m_userSocket;
+
 public:
     ChatClient(): m_userSocket(NULL) {}
     QString &username();
-    void setUsername(QString name);
     QString &userInfo();
-    void setUserInfo(QString info);
     QString &password();
-    void setPassword(QString pass);
     QTcpSocket *userSocket() const;
+    void setUsername(QString name);
+    void setUserInfo(QString info);
+    void setPassword(QString pass);
     void setUserSocket(QTcpSocket *socket);
 };
 
@@ -49,6 +50,7 @@ private:
     QString m_name;
     QString m_description;
     QString m_topic;
+
 public:
     QStringList userList;
     // should be private. but i couldn't find a nice way to provide
@@ -63,6 +65,7 @@ public:
     void addClient(QString username);
     void deleteClient(QString username);
     bool hasClient(QString username);
+    void deleteAllClients();
 };
 
 class DBManager: public QObject
@@ -106,12 +109,15 @@ signals:
 
 class GeneralClientList: public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 private:
     QMap<QString, ChatClient> m_generalClientList;
     QVector<ChatChannel> m_channelList;
     DBManager m_DB;
+
 public:
+    typedef QVector<QTcpSocket *> userSocketsList_t;
+    typedef QVectorIterator<QTcpSocket *> userSocketsListIterator_t;
     enum AuthResult
     {
         arAllreadyAuthorized,
@@ -127,9 +133,9 @@ public:
     explicit GeneralClientList(QObject *parent = 0);
     void readChannelsFromDB();
     ChatChannel getChannel(QString &channelName);
-    bool hasChannel(QString channelName);
     ChatClient getClient(const QString &username);
     bool hasClient(QString username);
+    bool hasChannel(QString channelName);
     QMap<QString, QString> getChannelsForClient(QString username);
     QMap<QString, QString> getAllChanells();
     RegResult registrate(QString username, QString password);
@@ -137,10 +143,15 @@ public:
     void disconnect(QString username);
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
+    void disconnectAll();
+    userSocketsList_t *getAllSockets();
+
 signals:
     void logMessage(ErrorStatus, QString &);
+
 private slots:
     void replyLog(ErrorStatus, QString &param);
+
 };
 
 #endif // CLIENTLIST_H
