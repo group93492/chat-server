@@ -534,7 +534,15 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
 {
     if (channelName == "main" || !m_DB.isMembership(username, channelName))
         return;
-    m_DB.deleteMembership(username, channelName);
+    for (int i = 0; i < m_channelList.count(); i++)
+    {
+        if (m_channelList[i].name() == channelName)
+        {
+            m_channelList[i].userList.removeAll(username);
+            m_DB.deleteMembership(username, channelName);
+            break;
+        }
+    }
 }
 
 GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString channelName,

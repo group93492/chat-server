@@ -369,25 +369,25 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
 {
     if(m_clientList.getChannel(msg->channelName).hasClient(msg->nick))
     {
+        //deleting user from channel
         m_clientList.leaveChannel(msg->nick, msg->channelName);
-        ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->message = msg->nick + " left channel";
-        newmsg->channelName = msg->channelName;
-        sendMessageToChannel(msg->channelName, newmsg);
-        channelLog(msg->channelName, newmsg->message);
-        delete newmsg;
+        //send message "user <tadada> left channel" to all remaining users in channel
+        ChannelSystemMessage *notifyMsg = new ChannelSystemMessage();
+        notifyMsg->message = msg->nick + " left channel";
+        notifyMsg->channelName = msg->channelName;
+        sendMessageToChannel(msg->channelName, notifyMsg);
+        //write a log about it
+        channelLog(msg->channelName, notifyMsg->message);
+        delete notifyMsg;
+        //update membership table
         emit updateTable("membership");
-        ChannelUserList *list = new ChannelUserList();
-        list->channelName = msg->channelName;
-        list->userList = m_clientList.getClientsForChannel(msg->channelName);
-        sendMessageToChannel(msg->channelName, list);
-        delete list;
+        //update userlists of all remaining users in channel
+        ChannelUserList *userListUpdateMsg = new ChannelUserList();
+        userListUpdateMsg->channelName = msg->channelName;
+        userListUpdateMsg->userList = m_clientList.getClientsForChannel(msg->channelName);
+        sendMessageToChannel(msg->channelName, userListUpdateMsg);
+        delete userListUpdateMsg;
     }
-    ChannelListMessage *listUpdate = new ChannelListMessage();
-    listUpdate->listType = ChannelListMessage::listOfJoined;
-    listUpdate->channelList = m_clientList.getChannelsForClient(msg->nick);
-    sendMessageToClient(msg->nick, listUpdate);
-    delete listUpdate;
 }
 
 void ChatServer::processMessage(ChannelCreateRequest *msg)
