@@ -26,6 +26,7 @@ private:
     Logger *m_logs;
     bool errorFilter(QVector<QString> vector, QString str);
     QSqlTableModel *m_tableModel;
+    QModelIndex m_lastIndex;
 
 private slots:
     void startServer();
@@ -40,6 +41,10 @@ private slots:
     void on_applyFilterButton_clicked();
 
     void on_stopServerButton_clicked();
+    void on_addRecordPushButton_clicked();
+    void enableDeleteRecordButton(QModelIndex index);
+    void on_deleteRecordPushButton_clicked();
+    
 };
 
 #endif // STATSWINDOW_H

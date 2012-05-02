@@ -18,6 +18,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     connect(m_logs, SIGNAL(addToListOfLogs(QStringList)), this, SLOT(addToComboBox(QStringList)));
     connect(ui->chooseLogToShowBox, SIGNAL(currentIndexChanged(QString)), m_logs, SLOT(currentLog(QString)));
     connect(ui->chooseTableToShowBox, SIGNAL(currentIndexChanged(QString)), this , SLOT(showTable(QString)));
+    connect(ui->currentTableView, SIGNAL(clicked(QModelIndex)), this, SLOT(enableDeleteRecordButton(QModelIndex)));
     m_settings->ReadConfig();
     m_settings->sendSignals();
     m_logs->StartLogger();
@@ -205,5 +206,53 @@ void StatsWindow::showTable(QString tableName)
         m_tableModel->select();
         m_tableModel->setEditStrategy(QSqlTableModel::OnFieldChange);
         ui->currentTableView->setModel(m_tableModel);
+        ui->deleteRecordPushButton->setEnabled(false);
     }
+}
+
+void StatsWindow::on_addRecordPushButton_clicked()
+{
+    QSqlQuery query;
+    QString q;
+    if(ui->chooseTableToShowBox->currentText() == "clients")
+        q = QString("INSERT INTO clients (name, password, info) "
+                    "VALUES ('', '', '')");
+    if(ui->chooseTableToShowBox->currentText() == "membership")
+        q = QString("INSERT INTO membership (channel, client) "
+                    "VALUES ('', '')");
+    if(ui->chooseTableToShowBox->currentText() == "channels")
+        q = QString("INSERT INTO channels (name, topic, description) "
+                    "VALUES ('', '', '')");
+    query.exec(q);
+    showTable(ui->chooseTableToShowBox->currentText());
+}
+
+void StatsWindow::enableDeleteRecordButton(QModelIndex index)
+{
+    ui->deleteRecordPushButton->setEnabled(true);
+    m_lastIndex = index;
+}
+
+void StatsWindow::on_deleteRecordPushButton_clicked()
+{
+    QSqlQuery query;
+    QString q;
+    if(ui->chooseTableToShowBox->currentText() == "clients")
+    {
+        q = QString("DELETE FROM clients WHERE name = '%1' AND password = '%2' AND info = '%3'")
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 0).data().toString())
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 1).data().toString())
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 2).data().toString());
+    }
+    if(ui->chooseTableToShowBox->currentText() == "membership")
+        q = QString("DELETE FROM membership WHERE channel = '%1' AND client = '%2'")
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 0).data().toString())
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 1).data().toString());
+    if(ui->chooseTableToShowBox->currentText() == "channels")
+        q = QString("DELETE FROM channels WHERE name = '%1' AND topic = '%2' AND description = '%3'")
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 0).data().toString())
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 1).data().toString())
+                .arg(m_lastIndex.sibling(m_lastIndex.row(), 2).data().toString());
+    query.exec(q);
+    showTable(ui->chooseTableToShowBox->currentText());
 }

@@ -397,9 +397,11 @@ QVector<ChatChannel> DBManager::getChannelList()
 
 ChatChannel GeneralClientList::getChannel(QString &channelName)
 {
+    ChatChannel result;
     for (int i = 0; i < m_channelList.count(); ++i)
         if (m_channelList[i].name() == channelName)
-            return m_channelList[i];
+            result = m_channelList[i];
+    return result;
 }
 
 bool GeneralClientList::hasChannel(QString channelName)
@@ -431,6 +433,18 @@ QMap<QString, QString> GeneralClientList::getChannelsForClient(QString username)
         if (m_DB.isMembership(username, m_channelList[i].name()))
             channels.insert(m_channelList[i].name(), m_channelList[i].description());
     return channels;
+}
+
+QStringList GeneralClientList::getClientsForChannel(QString channelName)
+{
+    QStringList result;
+    for (int i = 0; i < m_channelList.count(); i++)
+        if (m_channelList[i].name() == channelName)
+        {
+            result = m_channelList[i].userList;
+            break;
+        }
+    return result;
 }
 
 QMap<QString, QString> GeneralClientList::getAllChanells()
@@ -542,6 +556,25 @@ void GeneralClientList::leaveChannel(QString username, QString channelName)
     if (channelName == "main" || !m_DB.isMembership(username, channelName))
         return;
     m_DB.deleteMembership(username, channelName);
+}
+
+GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString channelName,
+                                                                        QString description,
+                                                                        QString topic)
+{
+    int maxChannelCount = 50;
+    if (m_channelList.count() >= maxChannelCount)
+        return ccrTooManyChannels;
+    for (int i = 0; i < m_channelList.count(); i++)
+        if (m_channelList[i].name() == channelName)
+            return ccrBadName;
+    ChatChannel newChannel;
+    newChannel.setDescription(description);
+    newChannel.setName(channelName);
+    newChannel.setTopic(topic);
+    m_DB.setChannel(newChannel);
+    m_channelList.append(newChannel);
+    return ccrSuccess;
 }
 
 void GeneralClientList::replyLog(ErrorStatus status, QString &param)

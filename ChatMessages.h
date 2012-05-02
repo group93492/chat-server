@@ -22,7 +22,10 @@ enum ChatMessageType
     cmtChannelJoinResult,
     cmtChannelLeaveMessage,
     cmtChannelSystemMessage,
-    cmtServerShutdownMessage
+    cmtServerShutdownMessage,
+    cmtChannelCreateRequest,
+    cmtChannelCreateResult,
+    cmtChannelUserList
     /*etc*/
 };
 
@@ -210,6 +213,41 @@ public:
     ServerShutdownMessage();
     ServerShutdownMessage(QDataStream &stream);
     QString shutdownReason;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelCreateRequest : public ChatMessageBody
+{
+public:
+    ChannelCreateRequest();
+    ChannelCreateRequest(QDataStream &stream);
+    QString channelName;
+    QString username;
+    QString channelDescription;
+    QString channelTopic;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelCreateResult : public ChatMessageBody
+{
+public:
+    ChannelCreateResult();
+    ChannelCreateResult(QDataStream &stream);
+    bool answer;
+    QString denialReason;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelUserList: public ChatMessageBody
+{
+public:
+    ChannelUserList();
+    ChannelUserList(QDataStream &stream);
+    QString channelName;
+    QStringList userList;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

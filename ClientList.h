@@ -130,6 +130,12 @@ public:
         rrOccupiedUsername,
         rrRegSuccess
     };
+    enum CreateChannelResult
+    {
+        ccrTooManyChannels,
+        ccrBadName,
+        ccrSuccess
+    };
     explicit GeneralClientList(QObject *parent = 0);
     void readChannelsFromDB();
     ChatChannel getChannel(QString &channelName);
@@ -137,6 +143,7 @@ public:
     bool hasClient(QString username);
     bool hasChannel(QString channelName);
     QMap<QString, QString> getChannelsForClient(QString username);
+    QStringList getClientsForChannel(QString channelName);
     QMap<QString, QString> getAllChanells();
     RegResult registrate(QString username, QString password);
     AuthResult authorize(QString username, QString password, QTcpSocket *socket);
@@ -146,6 +153,7 @@ public:
     void disconnectAll();
     userSocketsList_t *getAllSockets();
 
+    CreateChannelResult createChannel(QString channelName, QString description, QString topic);
 signals:
     void logMessage(ErrorStatus, QString &);
 
