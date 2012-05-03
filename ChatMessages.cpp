@@ -427,6 +427,7 @@ bool ServerShutdownMessage::unpack(QDataStream &stream)
     if(stream.status() != QDataStream::Ok)
         return false;
     stream >> shutdownReason;
+    return true;
 }
 
 ChannelCreateRequest::ChannelCreateRequest()
