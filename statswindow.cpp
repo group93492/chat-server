@@ -6,6 +6,7 @@ StatsWindow::StatsWindow(QWidget *parent) :
     ui(new Ui::StatsWindow)
 {
     ui->setupUi(this);
+    setWindowIcon(QIcon("icon.png"));
     ui->dateEdit->setDate(QDate::currentDate());
     m_settings = new ConfigManager;
     m_server = new ChatServer(this);
