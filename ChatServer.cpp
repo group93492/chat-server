@@ -430,23 +430,23 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
     if (result->answer)
     {
         m_clientList.joinChannel(msg->username, msg->channelName);
-        ChannelSystemMessage *joinMsg = new ChannelSystemMessage();
-        joinMsg->message = msg->username + " joined channel";
-        joinMsg->channelName = msg->channelName;
-        sendMessageToClient(msg->username, joinMsg);
-        delete joinMsg;
+        ChannelListMessage *userListUpdate = new ChannelListMessage();
+        userListUpdate->listType = ChannelListMessage::listOfJoined;
+        userListUpdate->channelList = m_clientList.getChannelsForClient(msg->username);
+        sendMessageToClient(msg->username, userListUpdate);
+        delete userListUpdate;
         ChannelListMessage *listUpdate = new ChannelListMessage();
-        listUpdate->listType = ChannelListMessage::listOfJoined;
-        listUpdate->channelList = m_clientList.getChannelsForClient(msg->username);
-        sendMessageToClient(msg->username, listUpdate);
+        listUpdate->listType = ChannelListMessage::listOfAll;
+        listUpdate->channelList = m_clientList.getAllChanells();
+        sendMessageToChannel("main", listUpdate);
         delete listUpdate;
-        emit updateTable("channels");
-        emit updateTable("membership");
         ChannelUserList *list = new ChannelUserList();
         list->channelName = msg->channelName;
         list->userList = m_clientList.getClientsForChannel(msg->channelName);
         sendMessageToChannel(msg->channelName, list);
         delete list;
+        emit updateTable("channels");
+        emit updateTable("membership");
     }
     delete result;
 }

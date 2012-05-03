@@ -484,8 +484,8 @@ bool ChannelCreateResult::unpack(QDataStream &stream)
     if (stream.status() != QDataStream::Ok)
         return false;
     stream >> answer;
-    if(answer)
-        stream << denialReason;
+    if(!answer)
+        stream >> denialReason;
     return true;
 }
 
