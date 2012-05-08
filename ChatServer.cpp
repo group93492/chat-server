@@ -353,16 +353,16 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
     {
         m_clientList.joinChannel(msg->nick, msg->channelName);
         answer->result = true;
-        ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-        newmsg->message = msg->nick + " joined channel";
-        newmsg->channelName = msg->channelName;
-        sendMessageToChannel(msg->channelName, newmsg);
-        delete newmsg;
         ChannelListMessage *listUpdate = new ChannelListMessage();
         listUpdate->listType = ChannelListMessage::listOfJoined;
         listUpdate->channelList = m_clientList.getChannelsForClient(msg->nick);
         sendMessageToClient(msg->nick, listUpdate);
         delete listUpdate;
+        ChannelSystemMessage *newmsg = new ChannelSystemMessage();
+        newmsg->message = msg->nick + " joined channel";
+        newmsg->channelName = msg->channelName;
+        sendMessageToChannel(msg->channelName, newmsg);
+        delete newmsg;
         emit updateTable("membership");
         ChannelUserList *list = new ChannelUserList();
         list->channelName = msg->channelName;
