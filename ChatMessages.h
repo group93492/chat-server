@@ -25,7 +25,8 @@ enum ChatMessageType
     cmtServerShutdownMessage,
     cmtChannelCreateRequest,
     cmtChannelCreateResult,
-    cmtChannelUserList
+    cmtChannelUserList,
+    cmtChannelThemeChanged
     /*etc*/
 };
 
@@ -248,6 +249,18 @@ public:
     ChannelUserList(QDataStream &stream);
     QString channelName;
     QStringList userList;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class ChannelThemeChanged : public ChatMessageBody
+{
+public:
+    ChannelThemeChanged();
+    ChannelThemeChanged(QDataStream &stream);
+    QString channel;
+    QString theme;
+    QString username;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

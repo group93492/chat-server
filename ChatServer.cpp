@@ -129,7 +129,14 @@ void ChatServer::serverGotNewMessage()
             }
         case cmtChannelCreateRequest:
             {
-                ChannelCreateRequest*msg = new ChannelCreateRequest(input);
+                ChannelCreateRequest *msg = new ChannelCreateRequest(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
+        case cmtChannelThemeChanged:
+            {
+                ChannelThemeChanged  *msg = new ChannelThemeChanged(input);
                 processMessage(msg);
                 delete msg;
                 break;
@@ -334,14 +341,19 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         chanListMsg->channelList = m_clientList.getChannelsForClient(msg->nick);
         sendMessageToClient(socket, chanListMsg);
         ChannelUserList *userListMsg = new ChannelUserList();
+        ChannelThemeChanged *theme = new ChannelThemeChanged();
         QMap<QString, QString>::iterator channel = chanListMsg->channelList.begin();
         for(;channel != chanListMsg->channelList.end(); ++channel)
         {
             userListMsg->channelName = channel.key();
             userListMsg->userList = m_clientList.getClientsForChannel(channel.key());
+            theme->channel = channel.key();
+            theme->theme = m_clientList.getChannel(userListMsg->channelName).topic();
             sendMessageToChannel(channel.key(), userListMsg);
+            sendMessageToClient(msg->nick, theme);
         }
         delete userListMsg;
+        delete theme;
     }
     delete chanListMsg;
 }
@@ -369,6 +381,11 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         list->userList = m_clientList.getClientsForChannel(msg->channelName);
         sendMessageToChannel(msg->channelName, list);
         delete list;
+        ChannelThemeChanged *theme = new ChannelThemeChanged();
+        theme->channel = msg->channelName;
+        theme->theme = m_clientList.getChannel(msg->channelName).topic();
+        sendMessageToClient(msg->nick, theme);
+        delete theme;
     }
     else
     {
@@ -445,10 +462,32 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
         list->userList = m_clientList.getClientsForChannel(msg->channelName);
         sendMessageToChannel(msg->channelName, list);
         delete list;
+        ChannelThemeChanged *theme = new ChannelThemeChanged();
+        theme->channel = msg->channelName;
+        theme->theme = m_clientList.getChannel(msg->channelName).topic();
+        sendMessageToClient(msg->username, theme);
+        delete theme;
         emit updateTable("channels");
         emit updateTable("membership");
     }
     delete result;
+}
+
+void ChatServer::processMessage(ChannelThemeChanged *msg)
+{
+    QString channel = msg->channel;
+    QString theme = msg->theme;
+    QString username = msg->username;
+    m_clientList.getChannel(channel).setTopic(theme);
+    sendMessageToChannel(channel, msg);
+    ChannelSystemMessage *newmsg = new ChannelSystemMessage();
+    newmsg->channelName = channel;
+    newmsg->message = QString("%1 changed channel theme to \"%2\"")
+            .arg(username)
+            .arg(theme);
+    emit channelLog(channel, newmsg->message);
+    sendMessageToChannel(channel, newmsg);
+    delete newmsg;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)

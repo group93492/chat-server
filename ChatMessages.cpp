@@ -515,3 +515,30 @@ bool ChannelUserList::unpack(QDataStream &stream)
     stream >> channelName >> userList;
     return true;
 }
+
+ChannelThemeChanged::ChannelThemeChanged()
+{
+    messageType = cmtChannelThemeChanged;
+}
+
+ChannelThemeChanged::ChannelThemeChanged(QDataStream &stream)
+{
+    messageType = cmtChannelThemeChanged;
+    unpack(stream);
+}
+
+bool ChannelThemeChanged::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << channel << theme << username;
+    return true;
+}
+
+bool ChannelThemeChanged::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> channel >> theme >> username;
+    return true;
+}
