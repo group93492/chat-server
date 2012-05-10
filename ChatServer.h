@@ -26,6 +26,7 @@ private:
     void processMessage(ChannelLeaveMessage *msg);
     void processMessage(ChannelCreateRequest *msg);
     void processMessage(ChannelThemeChanged *msg);
+    void processMessage(ClientStatusChanged *msg);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);
     void sendMessageToClient(QString username, ChatMessageBody *msgBody);
     void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);

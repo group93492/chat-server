@@ -542,3 +542,30 @@ bool ChannelThemeChanged::unpack(QDataStream &stream)
     stream >> channel >> theme >> username;
     return true;
 }
+
+ClientStatusChanged::ClientStatusChanged()
+{
+    messageType = cmtClientStatusChanged;
+}
+
+ClientStatusChanged::ClientStatusChanged(QDataStream &stream)
+{
+    messageType = cmtClientStatusChanged;
+    unpack(stream);
+}
+
+bool ClientStatusChanged::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username << status;
+    return true;
+}
+
+bool ClientStatusChanged::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username >> status;
+    return true;
+}

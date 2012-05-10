@@ -141,6 +141,13 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtClientStatusChanged:
+            {
+                ClientStatusChanged *msg = new ClientStatusChanged(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
         default:
             {
                 QString log = "Server received unknown-typed message" + msgType;
@@ -488,6 +495,14 @@ void ChatServer::processMessage(ChannelThemeChanged *msg)
     emit channelLog(channel, newmsg->message);
     sendMessageToChannel(channel, newmsg);
     delete newmsg;
+}
+
+void ChatServer::processMessage(ClientStatusChanged *msg)
+{
+    QStringList list = m_clientList.getChannelsForClient(msg->username).keys();
+    QStringList::iterator itr = list.begin();
+    for(; itr != list.end(); ++itr)
+        sendMessageToChannel(*itr, msg);
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
