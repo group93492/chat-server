@@ -27,11 +27,11 @@
      <enum>QTabWidget::North</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="configTab">
      <attribute name="title">
-      <string>Настройка</string>
+      <string>Settings</string>
      </attribute>
      <widget class="QPushButton" name="startServerButton">
       <property name="geometry">
@@ -85,7 +85,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Сохранить настройки</string>
+       <string>Save settings</string>
       </property>
      </widget>
      <widget class="QLabel" name="logsDirLabel">
@@ -98,7 +98,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Папка с логами</string>
+       <string>Path to logs</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="logPathEdit">
@@ -146,7 +146,7 @@
     </widget>
     <widget class="QWidget" name="logTab">
      <attribute name="title">
-      <string>Сообщения</string>
+      <string>Logs</string>
      </attribute>
      <widget class="QTextEdit" name="logBrowser">
       <property name="enabled">
@@ -194,7 +194,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Показать лог:</string>
+       <string>Show log:</string>
       </property>
      </widget>
      <widget class="QLabel" name="showDateLabel">
@@ -207,7 +207,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>За дату:</string>
+       <string>By date:</string>
       </property>
      </widget>
      <widget class="QGroupBox" name="groupBox">
@@ -220,7 +220,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>Фильтр</string>
+       <string>Filter</string>
       </property>
       <widget class="QLabel" name="showTimeLabel">
        <property name="geometry">
@@ -232,7 +232,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Время:</string>
+        <string>By time:</string>
        </property>
       </widget>
       <widget class="QTimeEdit" name="fromTimeEdit">
@@ -288,7 +288,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Показать события:</string>
+        <string>Show events:</string>
        </property>
       </widget>
       <widget class="QCheckBox" name="notifyCheckBox">
@@ -381,14 +381,14 @@
         </rect>
        </property>
        <property name="text">
-        <string>Отфильтровать</string>
+        <string>Filter</string>
        </property>
       </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="dbTab">
      <attribute name="title">
-      <string>БД</string>
+      <string>DataBase</string>
      </attribute>
      <widget class="QTableView" name="currentTableView">
       <property name="geometry">
@@ -401,6 +401,9 @@
       </property>
       <property name="selectionMode">
        <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
       </property>
      </widget>
      <widget class="QComboBox" name="chooseTableToShowBox">
@@ -436,7 +439,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Добавить пустую запись</string>
+       <string>Add empty record</string>
       </property>
      </widget>
      <widget class="QPushButton" name="deleteRecordPushButton">
@@ -452,7 +455,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Удалить выделенную запись</string>
+       <string>Delete selected record</string>
       </property>
      </widget>
     </widget>
