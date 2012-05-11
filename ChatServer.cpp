@@ -501,8 +501,21 @@ void ChatServer::processMessage(ClientStatusChanged *msg)
 {
     QStringList list = m_clientList.getChannelsForClient(msg->username).keys();
     QStringList::iterator itr = list.begin();
+    ChannelSystemMessage *system = new ChannelSystemMessage();
+    if(msg->status == "")
+        system->message = msg->username + " returned to original state";
+    else
+        system->message = QString("%1 changed his state to \"%2\"")
+                .arg(msg->username)
+                .arg(msg->status);
     for(; itr != list.end(); ++itr)
+    {
+        system->channelName = *itr;
         sendMessageToChannel(*itr, msg);
+        sendMessageToChannel(*itr, system);
+        emit channelLog(*itr, system->message);
+    }
+    delete system;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
