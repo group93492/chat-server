@@ -623,3 +623,84 @@ bool UserInfoMessage::unpack(QDataStream &stream)
     stream >> username >> info;
     return true;
 }
+
+UserInfoChanged::UserInfoChanged()
+{
+    messageType = cmtUserInfoChanged;
+}
+
+UserInfoChanged::UserInfoChanged(QDataStream &stream)
+{
+    messageType = cmtUserInfoChanged;
+    unpack(stream);
+}
+
+bool UserInfoChanged::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username << info;
+    return true;
+}
+
+bool UserInfoChanged::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username >> info;
+    return true;
+}
+
+PasswordChangeRequest::PasswordChangeRequest()
+{
+    messageType = cmtPasswordChangeRequest;
+}
+
+PasswordChangeRequest::PasswordChangeRequest(QDataStream &stream)
+{
+    messageType = cmtPasswordChangeResult;
+    unpack(stream);
+}
+
+bool PasswordChangeRequest::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username << oldPassword << newPassword;
+    return true;
+}
+
+bool PasswordChangeRequest::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username >> oldPassword >> newPassword;
+    return true;
+}
+
+PasswordChangeResult::PasswordChangeResult()
+{
+    messageType = cmtPasswordChangeResult;
+}
+
+PasswordChangeResult::PasswordChangeResult(QDataStream &stream)
+{
+    messageType = cmtPasswordChangeResult;
+    unpack(stream);
+}
+
+bool PasswordChangeResult::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << result;
+    return true;
+}
+
+bool PasswordChangeResult::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> result;
+    return true;
+}

@@ -29,7 +29,10 @@ enum ChatMessageType
     cmtChannelThemeChanged,
     cmtClientStatusChanged,
     cmtUserInfoRequest,
-    cmtUserInfoMessage
+    cmtUserInfoMessage,
+    cmtUserInfoChanged,
+    cmtPasswordChangeRequest,
+    cmtPasswordChangeResult
     /*etc*/
 };
 
@@ -296,6 +299,39 @@ public:
     UserInfoMessage(QDataStream &stream);
     QString username;
     QString info;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class UserInfoChanged : public ChatMessageBody
+{
+public:
+    UserInfoChanged();
+    UserInfoChanged(QDataStream &stream);
+    QString username;
+    QString info;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class PasswordChangeRequest : public ChatMessageBody
+{
+public:
+    PasswordChangeRequest();
+    PasswordChangeRequest(QDataStream &stream);
+    QString username;
+    QString oldPassword;
+    QString newPassword;
+    bool pack(QDataStream &stream) const;
+    bool unpack(QDataStream &stream);
+};
+
+class PasswordChangeResult : public ChatMessageBody
+{
+public:
+    PasswordChangeResult();
+    PasswordChangeResult(QDataStream &stream);
+    QString result;
     bool pack(QDataStream &stream) const;
     bool unpack(QDataStream &stream);
 };

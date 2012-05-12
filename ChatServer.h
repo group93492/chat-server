@@ -28,6 +28,8 @@ private:
     void processMessage(ChannelThemeChanged *msg);
     void processMessage(ClientStatusChanged *msg);
     void processMessage(UserInfoRequest *msg, QTcpSocket *socket);
+    void processMessage(UserInfoChanged *msg);
+    void processMessage(PasswordChangeRequest *msg);
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);
     void sendMessageToClient(QString username, ChatMessageBody *msgBody);
     void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);

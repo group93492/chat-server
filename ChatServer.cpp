@@ -155,6 +155,20 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtUserInfoChanged:
+            {
+                UserInfoChanged *msg = new UserInfoChanged(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
+        case cmtPasswordChangeRequest:
+            {
+                PasswordChangeRequest *msg = new PasswordChangeRequest(input);
+                processMessage(msg);
+                delete msg;
+                break;
+            }
         default:
             {
                 QString log = "Server received unknown-typed message" + msgType;
@@ -368,6 +382,11 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         }
         delete userListMsg;
         delete theme;
+        UserInfoMessage *userInfo = new UserInfoMessage();
+        userInfo->username = msg->nick;
+        userInfo->info = m_clientList.getClient(msg->nick).userInfo();
+        sendMessageToClient(msg->nick, userInfo);
+        delete userInfo;
     }
     delete chanListMsg;
 }
@@ -532,6 +551,32 @@ void ChatServer::processMessage(UserInfoRequest *msg, QTcpSocket *socket)
     answer->info = m_clientList.getClient(msg->username).userInfo();
     sendMessageToClient(socket, answer);
     delete answer;
+}
+
+void ChatServer::processMessage(UserInfoChanged *msg)
+{
+    m_clientList.getClient(msg->username).setUserInfo(msg->info);
+    QString log = "User " + msg->username + " changed his info";
+    emit serverLog(esNotify, log);
+}
+
+void ChatServer::processMessage(PasswordChangeRequest *msg)
+{
+    PasswordChangeResult *answer = new PasswordChangeResult;
+    if(m_clientList.getClient(msg->username).password() == msg->oldPassword)
+    {
+        m_clientList.getClient(msg->username).setPassword(msg->newPassword);
+        answer->result = "Password changed!";
+        QString log = "User " + msg->username + " changed his password";
+        emit serverLog(esNotify, log);
+    }
+    else
+    {
+        answer->result = "Incorrect your current password!";
+        QString log = "User " + msg->username + " tried change his password";
+        emit serverLog(esNotify, log);
+    }
+    sendMessageToClient(msg->username, answer);
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
