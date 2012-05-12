@@ -569,3 +569,57 @@ bool ClientStatusChanged::unpack(QDataStream &stream)
     stream >> username >> status;
     return true;
 }
+
+UserInfoRequest::UserInfoRequest()
+{
+    messageType = cmtUserInfoRequest;
+}
+
+UserInfoRequest::UserInfoRequest(QDataStream &stream)
+{
+    messageType = cmtUserInfoRequest;
+    unpack(stream);
+}
+
+bool UserInfoRequest::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username;
+    return true;
+}
+
+bool UserInfoRequest::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username;
+    return true;
+}
+
+UserInfoMessage::UserInfoMessage()
+{
+    messageType = cmtUserInfoMessage;
+}
+
+UserInfoMessage::UserInfoMessage(QDataStream &stream)
+{
+    messageType = cmtUserInfoMessage;
+    unpack(stream);
+}
+
+bool UserInfoMessage::pack(QDataStream &stream) const
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream << username << info;
+    return true;
+}
+
+bool UserInfoMessage::unpack(QDataStream &stream)
+{
+    if (stream.status() != QDataStream::Ok)
+        return false;
+    stream >> username >> info;
+    return true;
+}

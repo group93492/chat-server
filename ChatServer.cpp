@@ -148,6 +148,13 @@ void ChatServer::serverGotNewMessage()
                 delete msg;
                 break;
             }
+        case cmtUserInfoRequest:
+            {
+                UserInfoRequest *msg = new UserInfoRequest(input);
+                processMessage(msg, pClientSocket);
+                delete msg;
+                break;
+            }
         default:
             {
                 QString log = "Server received unknown-typed message" + msgType;
@@ -516,6 +523,15 @@ void ChatServer::processMessage(ClientStatusChanged *msg)
         emit channelLog(*itr, system->message);
     }
     delete system;
+}
+
+void ChatServer::processMessage(UserInfoRequest *msg, QTcpSocket *socket)
+{
+    UserInfoMessage *answer = new UserInfoMessage();
+    answer->username = msg->username;
+    answer->info = m_clientList.getClient(msg->username).userInfo();
+    sendMessageToClient(socket, answer);
+    delete answer;
 }
 
 void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
