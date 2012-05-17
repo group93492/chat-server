@@ -246,6 +246,10 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
     sendMessageToClient(socket, answer);
     if (answer->authorizationResult)
     {
+        ChatClient client = m_clientList.getClient(msg->username);
+        client.setUserState("Online");
+        m_clientList.updateClient(client);
+        emit updateTable("clients");
         QStringList channels = m_clientList.getChannelsForClient(msg->username).keys();
         ChannelSystemMessage *informMsg = new ChannelSystemMessage();
         ChannelUserList *updateListMsg = new ChannelUserList();
@@ -302,6 +306,7 @@ void ChatServer::processMessage(DisconnectMessage *msg)
         inform->channelName = channels[i];
         sendMessageToChannel(channels[i], inform);
     }
+    emit updateTable("clients");
     delete inform;
 }
 
@@ -508,18 +513,21 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
 
 void ChatServer::processMessage(ChannelThemeChanged *msg)
 {
-    QString channel = msg->channel;
+    QString channelName = msg->channel;
     QString theme = msg->theme;
     QString username = msg->username;
-    m_clientList.getChannel(channel).setTopic(theme);
-    sendMessageToChannel(channel, msg);
+    ChatChannel channel = m_clientList.getChannel(channelName);
+    channel.setTopic(theme);
+    m_clientList.updateChannel(channel);
+    sendMessageToChannel(channelName, msg);
     ChannelSystemMessage *newmsg = new ChannelSystemMessage();
-    newmsg->channelName = channel;
+    newmsg->channelName = channelName;
     newmsg->message = QString("%1 changed channel theme to \"%2\"")
-            .arg(username)
-            .arg(theme);
-    emit channelLog(channel, newmsg->message);
-    sendMessageToChannel(channel, newmsg);
+                              .arg(username)
+                              .arg(theme);
+    emit channelLog(channelName, newmsg->message);
+    emit updateTable("channels");
+    sendMessageToChannel(channelName, newmsg);
     delete newmsg;
 }
 
@@ -528,12 +536,21 @@ void ChatServer::processMessage(ClientStatusChanged *msg)
     QStringList list = m_clientList.getChannelsForClient(msg->username).keys();
     QStringList::iterator itr = list.begin();
     ChannelSystemMessage *system = new ChannelSystemMessage();
-    if(msg->status == "")
+    ChatClient client = m_clientList.getClient(msg->username);
+    if(msg->status.isEmpty())
+    {
         system->message = msg->username + " returned to original state";
+        client.setUserState("Online");
+    }
     else
+    {
+        client.setUserState(msg->status);
         system->message = QString("%1 changed his state to \"%2\"")
-                .arg(msg->username)
-                .arg(msg->status);
+                                  .arg(msg->username)
+                                  .arg(msg->status);
+    }
+    m_clientList.updateClient(client);
+    emit updateTable("clients");
     for(; itr != list.end(); ++itr)
     {
         system->channelName = *itr;
@@ -555,27 +572,33 @@ void ChatServer::processMessage(UserInfoRequest *msg, QTcpSocket *socket)
 
 void ChatServer::processMessage(UserInfoChanged *msg)
 {
-    m_clientList.getClient(msg->username).setUserInfo(msg->info);
+    ChatClient client = m_clientList.getClient(msg->username);
+    client.setUserInfo(msg->info);
+    m_clientList.updateClient(client);
     QString log = "User " + msg->username + " changed his info";
+    emit updateTable("clients");
     emit serverLog(esNotify, log);
 }
 
 void ChatServer::processMessage(PasswordChangeRequest *msg)
 {
     PasswordChangeResult *answer = new PasswordChangeResult;
-    if(m_clientList.getClient(msg->username).password() == msg->oldPassword)
+    ChatClient client = m_clientList.getClient(msg->username);
+    QString log;
+    if(client.password() == msg->oldPassword)
     {
-        m_clientList.getClient(msg->username).setPassword(msg->newPassword);
-        answer->result = "Password changed!";
-        QString log = "User " + msg->username + " changed his password";
-        emit serverLog(esNotify, log);
+        client.setPassword(msg->newPassword);
+        m_clientList.updateClient(client);
+        answer->result = "Password changed!\nDon't forget to use new password in the next authorization.";
+        log = "User " + msg->username + " changed his password";
+        emit updateTable("clients");
     }
     else
     {
-        answer->result = "Incorrect your current password!";
-        QString log = "User " + msg->username + " tried change his password";
-        emit serverLog(esNotify, log);
+        answer->result = "Given old password is incorrect!";
+        log = "User " + msg->username + " tried to change his password. Unfortunately, unsuccessfull.";
     }
+    emit serverLog(esNotify, log);
     sendMessageToClient(msg->username, answer);
 }
 
@@ -588,7 +611,6 @@ void ChatServer::sendMessageToClient(QString username, ChatMessageBody *msgBody)
     output.setVersion(QDataStream::Qt_4_7);
     output << quint16(0);
 
-//    ChatMessageSerializer::packMessage(output, msgBody);
     ChatMessageHeader *header = new ChatMessageHeader(msgBody);
     header->pack(output);
     msgBody->pack(output);
@@ -609,7 +631,6 @@ void ChatServer::sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBod
     output.setVersion(QDataStream::Qt_4_7);
     output << quint16(0);
 
-//    ChatMessageSerializer::packMessage(output, msgBody);
     ChatMessageHeader *header = new ChatMessageHeader(msgBody);
     header->pack(output);
     msgBody->pack(output);
