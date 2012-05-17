@@ -25,9 +25,19 @@ QString &ChatClient::password()
     return m_userPassword;
 }
 
+QString &ChatClient::userState()
+{
+    return m_userState;
+}
+
 void ChatClient::setPassword(QString pass)
 {
     m_userPassword = pass;
+}
+
+void ChatClient::setUserState(QString state)
+{
+    m_userState = state;
 }
 
 QTcpSocket *ChatClient::userSocket() const
@@ -154,7 +164,8 @@ bool DBManager::createClientsTable()
     QString str = "CREATE TABLE " + m_clientTableName + " ( "
             "name           VARCHAR(25) PRIMARY KEY ASC, "
             "password       VARCHAR(20), "
-            "info           VARCHAR(200) "
+            "info           VARCHAR(200), "
+            "status         VARCHAR(140) "
             ");";
     return query.exec(str);
 }
@@ -225,7 +236,7 @@ ChatClient DBManager::getClient(QString username)
 {
     ChatClient client;
     QSqlQuery query;
-    QString str = QString("SELECT name, password, info FROM '%1' WHERE name = '%2';")
+    QString str = QString("SELECT name, password, info, status FROM '%1' WHERE name = '%2';")
                     .arg(m_clientTableName)
                     .arg(username);
     if (!query.exec(str) || !query.next())
@@ -241,6 +252,7 @@ ChatClient DBManager::getClient(QString username)
         client.setUsername(query.value(0).toString());
         client.setPassword(query.value(1).toString());
         client.setUserInfo(query.value(2).toString());
+        client.setUserState(query.value(3).toString());
     }
     return client;
 }
@@ -250,15 +262,16 @@ ChatClient DBManager::getClient(QString username)
 void DBManager::setClient(ChatClient &client)
 {
     QSqlQuery query;
-    QString q = QString("REPLACE INTO %1 (rowid, name, password, info) "
-                        "VALUES (null, '%2', '%3', '%4')")
+    QString q = QString("REPLACE INTO %1 (rowid, name, password, info, status) "
+                        "VALUES (null, '%2', '%3', '%4', \"%5\");")
                         .arg(m_clientTableName)
                         .arg(client.username())
                         .arg(client.password())
-                        .arg(client.userInfo());
+                        .arg(client.userInfo())
+                        .arg(client.userState());
     if (!query.exec(q))
     {
-        QString msg("SQL query error in setting client: %1");
+        QString msg("SQL query error in setting client: \"%1\"");
         msg.arg(query.lastError().text());
         emit logMessage(esWarning, msg);
     }
@@ -465,6 +478,7 @@ GeneralClientList::RegResult GeneralClientList::registrate(QString username, QSt
     newClient.setUsername(username);
     newClient.setPassword(password);
     newClient.setUserInfo("Default userinfo for user " + username + ".");  //default userinfo
+    newClient.setUserState("Offline");
     m_DB.setClient(newClient);
     m_DB.addMembership(username, "main");
     return GeneralClientList::rrRegSuccess;
@@ -490,8 +504,9 @@ GeneralClientList::AuthResult GeneralClientList::authorize(QString username, QSt
     if (this->hasClient(username))
         return GeneralClientList::arAllreadyAuthorized;
     //ok, authorization tests passed
-    //add client to general list
+    //setting his socket ans status
     authClient.setUserSocket(socket);
+    //add client to general list
     m_generalClientList.insert(username, authClient);
     //and add him to channel lists
     for (int i = 0; i < m_channelList.count(); ++i)
@@ -505,7 +520,10 @@ void GeneralClientList::disconnect(QString username)
 {
     if (!this->hasClient(username))
         return;
-    m_generalClientList.value(username).userSocket()->close();
+    ChatClient client = getClient(username);
+    client.setUserState("Offline");
+    updateClient(client);
+    client.userSocket()->close();
     //socket->close();
     //delete client from channels
     for (int i = 0; i < m_channelList.count(); ++i)
@@ -579,6 +597,31 @@ GeneralClientList::CreateChannelResult GeneralClientList::createChannel(QString 
     m_DB.setChannel(newChannel);
     m_channelList.append(newChannel);
     return ccrSuccess;
+}
+
+void GeneralClientList::updateClient(ChatClient &client)
+{
+    //update client entry in DB
+    m_DB.setClient(client);
+    //remove current client from clientlist
+    m_generalClientList.remove(client.username());
+    //insert new client to clientlist
+    m_generalClientList.insert(client.username(), client);
+}
+
+void GeneralClientList::updateChannel(ChatChannel &channel)
+{
+    //update channel info in DB
+    m_DB.setChannel(channel);
+    //remove channel info in channel list
+    for (int i = 0; i < m_channelList.count(); i++)
+        if (m_channelList[i].name() == channel.name())
+        {
+            m_channelList.remove(i);
+            break;
+        }
+    //insert new channel into channel list
+    m_channelList.push_back(channel);
 }
 
 void GeneralClientList::replyLog(ErrorStatus status, QString &param)

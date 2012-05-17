@@ -10,19 +10,7 @@
 #include "ChatMessages.h"
 #include "logger.h"
 /*
-TODO:
-classes for client, channel and channel list
-channel list methods for:
-- initialize channel list from database
-- getting client list for certain channel
-- slots for authorization/deauthorization (auth - add to all channels in which he recorded) (disconnect - remove user from all channels he authorizated)
--
-*/
-/*
 TODO for future:
-- inviting in channels
-- leaving channels
-- private channels
 */
 class ChatClient
 {
@@ -30,17 +18,19 @@ private:
     QString m_username;
     QString m_userInfo;
     QString m_userPassword;
+    QString m_userState;
     QTcpSocket *m_userSocket;
-
 public:
     ChatClient(): m_userSocket(NULL) {}
     QString &username();
     QString &userInfo();
     QString &password();
+    QString &userState();
     QTcpSocket *userSocket() const;
     void setUsername(QString name);
     void setUserInfo(QString info);
     void setPassword(QString pass);
+    void setUserState(QString state);
     void setUserSocket(QTcpSocket *socket);
 };
 
@@ -151,9 +141,10 @@ public:
     void joinChannel(QString username, QString channelName);
     void leaveChannel(QString username, QString channelName);
     void disconnectAll();
-    userSocketsList_t *getAllSockets();
-
+    userSocketsList_t *getAllSockets();    
     CreateChannelResult createChannel(QString channelName, QString description, QString topic);
+    void updateClient(ChatClient &client);
+    void updateChannel(ChatChannel &channel);
 signals:
     void logMessage(ErrorStatus, QString &);
 
