@@ -33,7 +33,7 @@ private:
     void sendMessageToClient(QTcpSocket *socket, ChatMessageBody *msgBody);
     void sendMessageToClient(QString username, ChatMessageBody *msgBody);
     void sendMessageToChannel(QString channelName, ChatMessageBody *msgBody);
-
+    QString getSendableState(QString clientName);
 public:
     enum { defaultPort = 33033 };
     explicit ChatServer(QObject *parent = 0);
