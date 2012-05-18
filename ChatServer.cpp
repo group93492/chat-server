@@ -259,9 +259,12 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
             informMsg->channelName = channels[i];
             updateListMsg->channelName = channels[i];
             ChatChannel channel = m_clientList.getChannel(channels[i]);
-            updateListMsg->userList = channel.userList;
-            for (int j = 0; j < channel.userList.count(); j++)
+            for(int k = 0; k < channel.userList.count(); k++)
             {
+                updateListMsg->userList.insert(channel.userList[k], m_clientList.getClient(channel.userList[k]).userState());
+            }
+            for (int j = 0; j < channel.userList.count(); j++)
+            {                
                 QString username = channel.userList[j];
                 if (username != msg->username)
                 {
@@ -300,7 +303,11 @@ void ChatServer::processMessage(DisconnectMessage *msg)
     {
         list = new ChannelUserList();
         list->channelName = channels[i];
-        list->userList = m_clientList.getClientsForChannel(channels[i]);
+        ChatChannel channel = m_clientList.getChannel(channels[i]);
+        for(int j = 0; j < channel.userList.count(); j++)
+        {
+            list->userList.insert(channel.userList[j], m_clientList.getClient(channel.userList[j]).userState());
+        }
         sendMessageToChannel(channels[i], list);
         delete list;
         inform->channelName = channels[i];
@@ -378,8 +385,13 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
         QMap<QString, QString>::iterator channel = chanListMsg->channelList.begin();
         for(;channel != chanListMsg->channelList.end(); ++channel)
         {
+            QString channelName = channel.key();
+            ChatChannel tempChannel = m_clientList.getChannel(channelName);
             userListMsg->channelName = channel.key();
-            userListMsg->userList = m_clientList.getClientsForChannel(channel.key());
+            for(int i = 0; i < tempChannel.userList.count(); i++)
+            {
+                userListMsg->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+            }
             theme->channel = channel.key();
             theme->theme = m_clientList.getChannel(userListMsg->channelName).topic();
             sendMessageToChannel(channel.key(), userListMsg);
@@ -416,7 +428,11 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         emit updateTable("membership");
         ChannelUserList *list = new ChannelUserList();
         list->channelName = msg->channelName;
-        list->userList = m_clientList.getClientsForChannel(msg->channelName);
+        ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
+        for(int i = 0; i < tempChannel.userList.count(); i++)
+        {
+            list->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+        }
         sendMessageToChannel(msg->channelName, list);
         delete list;
         ChannelThemeChanged *theme = new ChannelThemeChanged();
@@ -453,7 +469,11 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         //update userlists of all remaining users in channel
         ChannelUserList *userListUpdateMsg = new ChannelUserList();
         userListUpdateMsg->channelName = msg->channelName;
-        userListUpdateMsg->userList = m_clientList.getClientsForChannel(msg->channelName);
+        ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
+        for(int i = 0; i < tempChannel.userList.count(); i++)
+        {
+            userListUpdateMsg->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+        }
         sendMessageToChannel(msg->channelName, userListUpdateMsg);
         delete userListUpdateMsg;
     }
@@ -497,7 +517,11 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
         delete listUpdate;
         ChannelUserList *list = new ChannelUserList();
         list->channelName = msg->channelName;
-        list->userList = m_clientList.getClientsForChannel(msg->channelName);
+        ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
+        for(int i = 0; i < tempChannel.userList.count(); i++)
+        {
+            list->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+        }
         sendMessageToChannel(msg->channelName, list);
         delete list;
         ChannelThemeChanged *theme = new ChannelThemeChanged();
