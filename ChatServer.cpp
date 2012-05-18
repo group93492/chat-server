@@ -261,7 +261,8 @@ void ChatServer::processMessage(AuthorizationRequest *msg, QTcpSocket *socket)
             ChatChannel channel = m_clientList.getChannel(channels[i]);
             for(int k = 0; k < channel.userList.count(); k++)
             {
-                updateListMsg->userList.insert(channel.userList[k], m_clientList.getClient(channel.userList[k]).userState());
+                //FIXME: GOVNOKOD
+                updateListMsg->userList.insert(channel.userList[k], getSendableState(channel.userList[k]));
             }
             for (int j = 0; j < channel.userList.count(); j++)
             {                
@@ -306,7 +307,8 @@ void ChatServer::processMessage(DisconnectMessage *msg)
         ChatChannel channel = m_clientList.getChannel(channels[i]);
         for(int j = 0; j < channel.userList.count(); j++)
         {
-            list->userList.insert(channel.userList[j], m_clientList.getClient(channel.userList[j]).userState());
+            //FIXME: GOVNOKOD
+            list->userList.insert(channel.userList[j], getSendableState(channel.userList[j]));
         }
         sendMessageToChannel(channels[i], list);
         delete list;
@@ -390,7 +392,8 @@ void ChatServer::processMessage(ChannelListRequest *msg, QTcpSocket *socket)
             userListMsg->channelName = channel.key();
             for(int i = 0; i < tempChannel.userList.count(); i++)
             {
-                userListMsg->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+                //FIXME: GOVNOKOD
+                userListMsg->userList.insert(tempChannel.userList[i], getSendableState(tempChannel.userList[i]));
             }
             theme->channel = channel.key();
             theme->theme = m_clientList.getChannel(userListMsg->channelName).topic();
@@ -431,7 +434,8 @@ void ChatServer::processMessage(ChannelJoinRequest *msg, QTcpSocket *socket)
         ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
         for(int i = 0; i < tempChannel.userList.count(); i++)
         {
-            list->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+            //FIXME: GOVNOKOD
+            list->userList.insert(tempChannel.userList[i], getSendableState(tempChannel.userList[i]));
         }
         sendMessageToChannel(msg->channelName, list);
         delete list;
@@ -472,7 +476,8 @@ void ChatServer::processMessage(ChannelLeaveMessage *msg)
         ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
         for(int i = 0; i < tempChannel.userList.count(); i++)
         {
-            userListUpdateMsg->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+            //FIXME: GOVNOKOD
+            userListUpdateMsg->userList.insert(tempChannel.userList[i], getSendableState(tempChannel.userList[i]));
         }
         sendMessageToChannel(msg->channelName, userListUpdateMsg);
         delete userListUpdateMsg;
@@ -520,7 +525,8 @@ void ChatServer::processMessage(ChannelCreateRequest *msg)
         ChatChannel tempChannel = m_clientList.getChannel(msg->channelName);
         for(int i = 0; i < tempChannel.userList.count(); i++)
         {
-            list->userList.insert(tempChannel.userList[i], m_clientList.getClient(tempChannel.userList[i]).userState());
+            //FIXME: GOVNOKOD
+            list->userList.insert(tempChannel.userList[i], getSendableState(tempChannel.userList[i]));
         }
         sendMessageToChannel(msg->channelName, list);
         delete list;
@@ -687,4 +693,10 @@ void ChatServer::sendMessageToChannel(QString channelName, ChatMessageBody *msgB
         sendMessageToClient(channel.userList[i], msgBody);
         /*channel.userList[i]->userSocket()->write(arrBlock);*/
     }
+}
+
+QString ChatServer::getSendableState(QString clientName)
+{
+    QString state = m_clientList.getClient(clientName).userState();
+    return (state == "Online") ? "" : state;
 }
